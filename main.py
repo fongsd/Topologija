@@ -1,6 +1,7 @@
 import pygame
 import random 
 import time
+import math
 from krug import Krug
 pygame.init()
 
@@ -8,8 +9,17 @@ screen = pygame.display.set_mode((800, 600), pygame.RESIZABLE)
 
 
 def nacrtaj_krug(krug : Krug):
-    pygame.draw.circle(screen, (255, 20, 20), (krug.get_x(), krug.get_y()), 7, 0)
+    pygame.draw.circle(screen, (255, 20, 20), (krug.get_x(), krug.get_y()), 4, 0)
 
+def nacrtaj_putanje(pedestrians : list ):
+    for i in pedestrians:
+        dx = int(random.random() * 10)
+        dy = int(random.random() * 10)
+        s = round(random.random()* 2) - 1 
+        k = round(random.random() * 2 ) - 1
+        # print(s, k)
+        pygame.draw.line(screen, (200, 150, 150), (i.get_x(), i.get_y()), 
+                         (i.get_x() + pow(-1, s) * dx, i.get_y() + pow(-1, k) * dy), 1)
 
 def nacrtaj_dugme():
     pygame.draw.rect(screen, (250, 0, 0), (10, 10, 60, 40), 0, 2)
@@ -57,6 +67,9 @@ while running:
                         pedestrians.append(krug)
                 pygame.display.update()     
         if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_v:
+                nacrtaj_putanje(pedestrians)
+
             if event.key == pygame.K_l:
                 for i in range(len(pedestrians) - 1):
                     br_linija+=1
