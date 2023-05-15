@@ -174,7 +174,7 @@ def __main__():
                             nacrtaj_krug(pedestrians[i], "white")
                             pedestrians[i] = Krug(putanje[i][0], putanje[i][1])
                             pygame.draw.line(screen, "white", (pedestrians[i].get_x(), pedestrians[i].get_y())
-                                                               , (stari[i].get_x(), stari[i].get_y()), 4)
+                                                               , (stari[i].get_x(), stari[i].get_y()), 7)
                             nacrtaj_krug(pedestrians[i], "black")
                         putanje = []
                         nacrtaj_putanje(pedestrians, "red")
