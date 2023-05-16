@@ -11,23 +11,25 @@ pygame.init()
 
 #TODO
 #-pocetak i kraj - treba odraditi click eventove GOTOVO
-#-triangulacija 
-#-centroidi
-#-triangulacija nad centroidima, pocetkom i krajem
+#-triangulacija GOTOVO
+#-centroidi GOTOVO
+#-triangulacija nad centroidima, pocetkom i krajem GOTOVO 
 #-TA*
 
-#-kretanje pesaka po jedinici vremena(iteracija ili po sekundi)
+#-kretanje pesaka po jedinici vremena(iteracija ili po sekundi) GOTOVO
+#-pomeranje centroida i trouglova po jedinici vremena
 #-TA* po jedinici vremena da radi
 #-iscrtavanje puta
 
 screen = pygame.display.set_mode((800, 600), pygame.RESIZABLE)
-screen.fill("white")
+screen.fill("black")
 
 putanje = []
 centroidi = []
 pedestrians = []
 trouglovi = 0
-
+start = (0, 0)
+end = (0, 0)
 
 def nacrtaj_krug(krug : Krug, boja):
     pygame.draw.circle(screen, boja, (krug.get_x(), krug.get_y()), 4, 0)
@@ -90,7 +92,7 @@ def kretanje():
     global pedestrians
     global putanje
     for i in range(10):
-        screen.fill("white")
+        screen.fill("black")
         pomeranje_pesaka()
         # triangulacija_temena()
         # pomeranje_centroida()
@@ -99,7 +101,7 @@ def kretanje():
         putanje = []
         pygame.display.update()
         time.sleep(1)
-    screen.fill("white")
+    screen.fill("black")
     pomeranje_pesaka()
     pygame.display.update()
 
@@ -110,13 +112,13 @@ def pomeranje_pesaka():
     stari = copy.deepcopy(pedestrians)
     nacrtaj_putanje(pedestrians, "red")
     for i in range(len(pedestrians)):
-            # nacrtaj_krug(pedestrians[i], "white")
-            nacrtaj_krug(pedestrians[i], "black")
+            # nacrtaj_krug(pedestrians[i], "black")
+            nacrtaj_krug(pedestrians[i], "white")
             nacrtaj_obim(pedestrians[i], putanje[i][0], putanje[i][1])
     triangulacija_temena()
     for i in range(len(pedestrians)):
             pedestrians[i] = Krug(putanje[i][0], putanje[i][1])
-            # pygame.draw.line(screen, "white", (pedestrians[i].get_x(), pedestrians[i].get_y())
+            # pygame.draw.line(screen, "black", (pedestrians[i].get_x(), pedestrians[i].get_y())
                                             #    , (stari[i].get_x(), stari[i].get_y()), 4)
     
 def pomeranje_centroida():
@@ -136,10 +138,18 @@ def triangulacija_temena():
         pedestrians_xy.append((pedestrians_x_coord[i], pedestrians_y_coord[i]))
                     
     tri = Delaunay(np.array(pedestrians_xy))
+    centroidi = []
     for trougao in tri.simplices:
         spoji_temena(pedestrians, trougao[0], trougao[1], trougao[2])
         centroid = nadji_centroid(pedestrians, trougao[0], trougao[1], trougao[2])
         centroidi.append(centroid)
+    # povezi_centroide()
+
+def povezi_centroide():
+    global centroidi
+    triCentroid = Delaunay(centroidi)
+    for i in triCentroid.simplices:
+        spoji_centroide(centroidi[i[0]], centroidi[i[1]], centroidi[i[2]])
 
 
 def __main__():
@@ -167,11 +177,11 @@ def __main__():
                     x, y = pygame.mouse.get_pos()
                     x = int(x)
                     if x >= 10 and x <= 60 and y >= 10 and y<=40:
-                        for i in range(3):
+                        for i in range(20):
                             x_pos = random.random() * screen.get_width()
                             y_pos = random.random() * screen.get_height()
                             krug = Krug(x_pos, y_pos)
-                            nacrtaj_krug(krug, "black")
+                            nacrtaj_krug(krug, "white")
                             pedestrians.append(krug)
                     else:
                         if br_unosa <= 1:
@@ -184,18 +194,16 @@ def __main__():
                 if event.key == pygame.K_t:
                     triangulacija_temena()
 
-                # if event.key == pygame.K_v:
-                #     nacrtaj_putanje(pedestrians, "red")
+                if event.key == pygame.K_v:
+                    nacrtaj_putanje(pedestrians, "red")
 
                 if event.key == pygame.K_c:
                         for i in centroidi:
                             # print(i)
-                            pygame.draw.circle(screen, "blue", i, 5)
+                            pygame.draw.circle(screen, "blue", i, 7)
                         # print(len(tri))
 
-                        triCentroid = Delaunay(centroidi)
-                        for i in triCentroid.simplices:
-                            spoji_centroide(centroidi[i[0]], centroidi[i[1]], centroidi[i[2]])
+                        povezi_centroide()
                             # spoji_temena(centroidi, Krug(centroidi[i[0]]), )
 
                 if event.key == pygame.K_p:
@@ -210,24 +218,25 @@ def __main__():
                         krug = Krug(poz_x, poz_y)
                         nacrtaj_obim(krug, dx, dy)
 
-                if event.key == pygame.K_l:
-                    for i in range(len(pedestrians) - 1):
-                        br_linija+=1
-                        nacrtaj_liniju(pedestrians[i], pedestrians[i + 1]) # ovde se pravi triangulacija tacaka
-                if event.key == pygame.K_1:
-                    for i in range(len(pedestrians) - 1):
-                        # sused = int(random.random() * len(pedestrians) - 1)
-                        izmeni_boju(pedestrians[i], pedestrians[i + 1], "yellow")
-                        print("menja se boja linije")
-                        pygame.display.update()
-                        time.sleep(0.02)
-                if event.key == pygame.K_2:
-                    for i in range(20):
-                        # sused = int(random.random() * len(pedestrians) - 1)
-                        izmeni_boju(pedestrians[i], pedestrians[i + 1], "green")
-                        print("menja se boja linije")
-                        pygame.display.update() # need to update screen every time before pause and next drawing 
-                        time.sleep(0.2)
+                # if event.key == pygame.K_l:
+                #     for i in range(len(pedestrians) - 1):
+                #         br_linija+=1
+                #         nacrtaj_liniju(pedestrians[i], pedestrians[i + 1]) # ovde se pravi triangulacija tacaka
+              
+                # if event.key == pygame.K_1:
+                #     for i in range(len(pedestrians) - 1):
+                #         # sused = int(random.random() * len(pedestrians) - 1)
+                #         izmeni_boju(pedestrians[i], pedestrians[i + 1], "yellow")
+                #         print("menja se boja linije")
+                #         pygame.display.update()
+                #         time.sleep(0.02)
+                # if event.key == pygame.K_2:
+                #     for i in range(20):
+                #         # sused = int(random.random() * len(pedestrians) - 1)
+                #         izmeni_boju(pedestrians[i], pedestrians[i + 1], "green")
+                #         print("menja se boja linije")
+                #         pygame.display.update() # need to update screen every time before pause and next drawing 
+                #         time.sleep(0.2)
             pygame.display.update()
 
 
