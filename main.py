@@ -24,6 +24,7 @@ screen = pygame.display.set_mode((800, 600), pygame.RESIZABLE)
 screen.fill("white")
 
 putanje = []
+centroidi = []
 pedestrians = []
 trouglovi = 0
 
@@ -91,13 +92,16 @@ def kretanje():
     for i in range(10):
         screen.fill("white")
         pomeranje_pesaka()
-
-        pomeranje_centroida()
+        # triangulacija_temena()
+        # pomeranje_centroida()
 
 
         putanje = []
         pygame.display.update()
         time.sleep(1)
+    screen.fill("white")
+    pomeranje_pesaka()
+    pygame.display.update()
 
 
 def pomeranje_pesaka():
@@ -107,22 +111,44 @@ def pomeranje_pesaka():
     nacrtaj_putanje(pedestrians, "red")
     for i in range(len(pedestrians)):
             # nacrtaj_krug(pedestrians[i], "white")
+            nacrtaj_krug(pedestrians[i], "black")
+            nacrtaj_obim(pedestrians[i], putanje[i][0], putanje[i][1])
+    triangulacija_temena()
+    for i in range(len(pedestrians)):
             pedestrians[i] = Krug(putanje[i][0], putanje[i][1])
-            nacrtaj_obim(pedestrians[i], stari[i].get_x(), stari[i].get_y())
             # pygame.draw.line(screen, "white", (pedestrians[i].get_x(), pedestrians[i].get_y())
                                             #    , (stari[i].get_x(), stari[i].get_y()), 4)
-            nacrtaj_krug(pedestrians[i], "black")
-
+    
 def pomeranje_centroida():
     pass
+
+
+def triangulacija_temena():
+    global centroidi
+    global pedestrians
+    pedestrians_xy = []
+    pedestrians_x_coord = []
+    pedestrians_y_coord = []
+    for i in pedestrians:
+        pedestrians_x_coord.append(i.get_x())
+        pedestrians_y_coord.append(i.get_y())
+    for i in range(len(pedestrians_x_coord)):
+        pedestrians_xy.append((pedestrians_x_coord[i], pedestrians_y_coord[i]))
+                    
+    tri = Delaunay(np.array(pedestrians_xy))
+    for trougao in tri.simplices:
+        spoji_temena(pedestrians, trougao[0], trougao[1], trougao[2])
+        centroid = nadji_centroid(pedestrians, trougao[0], trougao[1], trougao[2])
+        centroidi.append(centroid)
+
 
 def __main__():
     global trouglovi
     global putanje
+    global centroidi
     nacrtaj_dugme()
 
     global pedestrians
-    centroidi = []
     br_unosa = 0
     br_linija = 0
     running = True
@@ -141,7 +167,7 @@ def __main__():
                     x, y = pygame.mouse.get_pos()
                     x = int(x)
                     if x >= 10 and x <= 60 and y >= 10 and y<=40:
-                        for i in range(50):
+                        for i in range(3):
                             x_pos = random.random() * screen.get_width()
                             y_pos = random.random() * screen.get_height()
                             krug = Krug(x_pos, y_pos)
@@ -156,20 +182,7 @@ def __main__():
             if event.type == pygame.KEYDOWN:
 
                 if event.key == pygame.K_t:
-                    pedestrians_xy = []
-                    pedestrians_x_coord = []
-                    pedestrians_y_coord = []
-                    for i in pedestrians:
-                        pedestrians_x_coord.append(i.get_x())
-                        pedestrians_y_coord.append(i.get_y())
-                    for i in range(len(pedestrians_x_coord)):
-                        pedestrians_xy.append((pedestrians_x_coord[i], pedestrians_y_coord[i]))
-                    
-                    tri = Delaunay(np.array(pedestrians_xy))
-                    for trougao in tri.simplices:
-                        spoji_temena(pedestrians, trougao[0], trougao[1], trougao[2])
-                        centroid = nadji_centroid(pedestrians, trougao[0], trougao[1], trougao[2])
-                        centroidi.append(centroid)
+                    triangulacija_temena()
 
                 # if event.key == pygame.K_v:
                 #     nacrtaj_putanje(pedestrians, "red")
