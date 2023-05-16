@@ -114,7 +114,7 @@ def pomeranje_pesaka():
     for i in range(len(pedestrians)):
             # nacrtaj_krug(pedestrians[i], "black")
             nacrtaj_krug(pedestrians[i], "white")
-            nacrtaj_obim(pedestrians[i], putanje[i][0], putanje[i][1])
+            # nacrtaj_obim(pedestrians[i], putanje[i][0], putanje[i][1])
     triangulacija_temena()
     for i in range(len(pedestrians)):
             pedestrians[i] = Krug(putanje[i][0], putanje[i][1])
@@ -143,13 +143,16 @@ def triangulacija_temena():
         spoji_temena(pedestrians, trougao[0], trougao[1], trougao[2])
         centroid = nadji_centroid(pedestrians, trougao[0], trougao[1], trougao[2])
         centroidi.append(centroid)
-    # povezi_centroide()
+    povezi_centroide()
 
 def povezi_centroide():
     global centroidi
     triCentroid = Delaunay(centroidi)
     for i in triCentroid.simplices:
         spoji_centroide(centroidi[i[0]], centroidi[i[1]], centroidi[i[2]])
+
+    for i in centroidi:
+        pygame.draw.circle(screen, "blue", i, 7)    
 
 
 def __main__():
@@ -177,7 +180,7 @@ def __main__():
                     x, y = pygame.mouse.get_pos()
                     x = int(x)
                     if x >= 10 and x <= 60 and y >= 10 and y<=40:
-                        for i in range(20):
+                        for i in range(10):
                             x_pos = random.random() * screen.get_width()
                             y_pos = random.random() * screen.get_height()
                             krug = Krug(x_pos, y_pos)
@@ -200,7 +203,7 @@ def __main__():
                 if event.key == pygame.K_c:
                         for i in centroidi:
                             # print(i)
-                            pygame.draw.circle(screen, "blue", i, 7)
+                            pygame.draw.circle(screen, "blue", i, 5)
                         # print(len(tri))
 
                         povezi_centroide()
