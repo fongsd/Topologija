@@ -9,7 +9,7 @@ import copy
 pygame.init()
 
 
-#TODO
+#TODO v1.0
 #-pocetak i kraj - treba odraditi click eventove GOTOVO
 #-triangulacija GOTOVO
 #-centroidi GOTOVO
@@ -17,9 +17,24 @@ pygame.init()
 #-TA*
 
 #-kretanje pesaka po jedinici vremena(iteracija ili po sekundi) GOTOVO
-#-pomeranje centroida i trouglova po jedinici vremena
+#-pomeranje centroida i trouglova po jedinici vremena GOTOVO
 #-TA* po jedinici vremena da radi
-#-iscrtavanje puta
+#-iscrtavanje puta 
+
+#TODO v1.1 
+#-nalazenje preseka izmedju precnika putanje i puta izmedju dva centorida
+            #ideja:
+                #-za svaki par centroida 
+                    #-za svakog pesaka izracunamo razdaljinu izmedju njega i par centroida
+                        #- ako je duzina veca ili jednaka od poluprecnika putanje pesaka/jedinici vremena 
+                            #-onda moze da se robot krece tim putem
+                        #- inace ne sme da se krece
+                            #-linija se obiji u crveno
+            
+            # za sad samo da se linija oboji u crveno ako ima presek sa odredjenim pesakom
+
+
+
 
 screen = pygame.display.set_mode((800, 600), pygame.RESIZABLE)
 screen.fill("black")
@@ -197,12 +212,13 @@ def __main__():
                             dy = random.random() * 15
                             pocetne_putanje.append((dx, dy))
                         nacrtaj_putanje(pedestrians, "red")
-                    else:
+                    elif br_unosa<2:
                         if br_unosa < 1:
                             start = (x, y)
                             br_unosa +=1
-                        else:
+                        elif br_unosa == 1:
                             end = (x, y) 
+                            br_unosa+=1
                         centroidi.append((x, y))
                         pygame.draw.circle(screen, "purple", (x, y), 10)
                     pygame.display.update()     
@@ -227,14 +243,14 @@ def __main__():
                 if event.key == pygame.K_p:
                     kretanje() #"live" kretanje 
 
-                if event.key == pygame.K_k :
-                    for i in range(len(pedestrians)):
-                        poz_x = pedestrians[i].get_x()
-                        poz_y = pedestrians[i].get_y()
-                        dx = trenutne_putanje[i][0]
-                        dy = trenutne_putanje[i][1]
-                        krug = Krug(poz_x, poz_y)
-                        nacrtaj_obim(krug, dx, dy)
+                # if event.key == pygame.K_k :
+                #     for i in range(len(pedestrians)):
+                #         poz_x = pedestrians[i].get_x()
+                #         poz_y = pedestrians[i].get_y()
+                #         dx = trenutne_putanje[i][0]
+                #         dy = trenutne_putanje[i][1]
+                #         krug = Krug(poz_x, poz_y)
+                #         nacrtaj_obim(krug, dx, dy)
 
                 # if event.key == pygame.K_l:
                 #     for i in range(len(pedestrians) - 1):
