@@ -25,8 +25,10 @@ screen = pygame.display.set_mode((800, 600), pygame.RESIZABLE)
 screen.fill("black")
 
 putanje = []
+pocetne_putanje = []
 centroidi = []
 pedestrians = []
+trenutne_putanje = []
 trouglovi = 0
 start = (0, 0)
 end = (0, 0)
@@ -34,16 +36,31 @@ end = (0, 0)
 def nacrtaj_krug(krug : Krug, boja):
     pygame.draw.circle(screen, boja, (krug.get_x(), krug.get_y()), 4, 0)
 
-def nacrtaj_putanje(pedestrians : list, color):
-    for i in pedestrians:
-        dx = int(random.random() * 30)
-        dy = int(random.random() * 30)
+def nacrtaj_trenutne_putanje(pedestrians : list, color):
+    for i in range(len(pedestrians)):
+        dx = int(random.random() * 3)
+        dy = int(random.random() * 3)
+        # print(s, k)
+        pygame.draw.line(screen, color, 
+                        (pedestrians[i].get_x(), pedestrians[i].get_y()),
+                        (pedestrians[i].get_x() + pocetne_putanje[i][0] * dx,
+                          pedestrians[i].get_y() + pocetne_putanje[i][1] * dy) 
+                         , 4)
+        putanje.append( (pedestrians[i].get_x() + pocetne_putanje[i][0] * dx,
+                          pedestrians[i].get_y() + pocetne_putanje[i][1] * dy) )
+    
+def nacrtaj_pocetne_putanje(pedestrians : list, color):
+    global pocetne_putanje, trenutne_putanje
+    for i in range(len(pedestrians)):
+        # print(s, k)
         s = round(random.random()* 2) - 1 
         k = round(random.random() * 2 ) - 1
-        # print(s, k)
-        pygame.draw.line(screen, color, (i.get_x(), i.get_y()), 
-                         (i.get_x() + pow(-1, s) * dx, i.get_y() + pow(-1, k) * dy), 4)
-        putanje.append((i.get_x() + pow(-1, s) * dx, i.get_y() + pow(-1, k) * dy))
+        # pygame.draw.line(screen, color, (pedestrians[i].get_x(), pedestrians[i].get_y()), 
+        #                  (pedestrians[i].get_x() + pow(-1, s) * pocetne_putanje[i][0], 
+        #                   pedestrians[i].get_y() + pow(-1, k) * pocetne_putanje[i][1]), 4)
+        
+        trenutne_putanje.append((pedestrians[i].get_x() + pow(-1, s) * pocetne_putanje[i][0],
+                                  pedestrians[i].get_y() + pow(-1, k) * pocetne_putanje[i][1]))
 
 def nacrtaj_dugme():
     pygame.draw.rect(screen, (250, 0, 0), (10, 10, 60, 40), 0, 2)
@@ -110,7 +127,7 @@ def pomeranje_pesaka():
     global pedestrians
     global putanje
     stari = copy.deepcopy(pedestrians)
-    nacrtaj_putanje(pedestrians, "red")
+    nacrtaj_trenutne_putanje(pedestrians, "red")
     for i in range(len(pedestrians)):
             # nacrtaj_krug(pedestrians[i], "black")
             nacrtaj_krug(pedestrians[i], "white")
@@ -180,12 +197,16 @@ def __main__():
                     x, y = pygame.mouse.get_pos()
                     x = int(x)
                     if x >= 10 and x <= 60 and y >= 10 and y<=40:
-                        for i in range(10):
+                        for i in range(6):
                             x_pos = random.random() * screen.get_width()
                             y_pos = random.random() * screen.get_height()
                             krug = Krug(x_pos, y_pos)
                             nacrtaj_krug(krug, "white")
                             pedestrians.append(krug)
+                            dx = random.random() * 10
+                            dy = random.random() * 15
+                            pocetne_putanje.append((dx, dy))
+                        nacrtaj_pocetne_putanje(pedestrians, "red")
                     else:
                         if br_unosa <= 1:
                             pygame.draw.circle(screen, "green", (x, y), 10)
@@ -197,8 +218,8 @@ def __main__():
                 if event.key == pygame.K_t:
                     triangulacija_temena()
 
-                if event.key == pygame.K_v:
-                    nacrtaj_putanje(pedestrians, "red")
+                # if event.key == pygame.K_v:
+                #     nacrtaj_trenutne_putanje(pedestrians, "red")
 
                 if event.key == pygame.K_c:
                         for i in centroidi:
@@ -216,8 +237,8 @@ def __main__():
                     for i in range(len(pedestrians)):
                         poz_x = pedestrians[i].get_x()
                         poz_y = pedestrians[i].get_y()
-                        dx = putanje[i][0]
-                        dy = putanje[i][1]
+                        dx = trenutne_putanje[i][0]
+                        dy = trenutne_putanje[i][1]
                         krug = Krug(poz_x, poz_y)
                         nacrtaj_obim(krug, dx, dy)
 
