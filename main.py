@@ -36,14 +36,16 @@ def nacrtaj_krug(krug : Krug, boja):
 
 def nacrtaj_putanje(pedestrians : list, color):
     for i in pedestrians:
-        dx = int(random.random() * 30)
-        dy = int(random.random() * 30)
-        s = round(random.random()* 2) - 1 
-        k = round(random.random() * 2 ) - 1
+        dx = int(random.random() * 15)
+        # dy = int(random.random() * 10)
+        # s = round(random.random()* 2) - 1 
+        # k = round(random.random() * 2 ) - 1
         # print(s, k)
         pygame.draw.line(screen, color, (i.get_x(), i.get_y()), 
-                         (i.get_x() + pow(-1, s) * dx, i.get_y() + pow(-1, k) * dy), 4)
-        putanje.append((i.get_x() + pow(-1, s) * dx, i.get_y() + pow(-1, k) * dy))
+                         (i.get_x() + dx, i.get_y() + dx), 4)
+        putanje.append((i.get_x() + dx, i.get_y() + dx))
+
+
 
 def nacrtaj_dugme():
     pygame.draw.rect(screen, (250, 0, 0), (10, 10, 60, 40), 0, 2)
@@ -139,6 +141,8 @@ def triangulacija_temena():
                     
     tri = Delaunay(np.array(pedestrians_xy))
     centroidi = []
+    centroidi.append(start)
+    centroidi.append(end)
     for trougao in tri.simplices:
         spoji_temena(pedestrians, trougao[0], trougao[1], trougao[2])
         centroid = nadji_centroid(pedestrians, trougao[0], trougao[1], trougao[2])
@@ -160,7 +164,7 @@ def __main__():
     global putanje
     global centroidi
     nacrtaj_dugme()
-
+    global start, end
     global pedestrians
     br_unosa = 0
     br_linija = 0
@@ -180,22 +184,26 @@ def __main__():
                     x, y = pygame.mouse.get_pos()
                     x = int(x)
                     if x >= 10 and x <= 60 and y >= 10 and y<=40:
-                        for i in range(10):
-                            x_pos = random.random() * screen.get_width()
-                            y_pos = random.random() * screen.get_height()
+                        for i in range(6):
+                            x_pos = abs(random.random() * screen.get_width() - 200) + 100 # da ne bi bili previse blizu ivici
+                            y_pos = abs(random.random() * screen.get_height() - 200) + 100
                             krug = Krug(x_pos, y_pos)
                             nacrtaj_krug(krug, "white")
                             pedestrians.append(krug)
                     else:
-                        if br_unosa <= 1:
-                            pygame.draw.circle(screen, "green", (x, y), 10)
-                            centroidi.append((x, y))
-                        br_unosa +=1 
+                        if br_unosa < 1:
+                            start = (x, y)
+                            br_unosa +=1
+                        else:
+                            end = (x, y) 
+                        centroidi.append((x, y))
+                        pygame.draw.circle(screen, "purple", (x, y), 10)
                     pygame.display.update()     
             if event.type == pygame.KEYDOWN:
 
                 if event.key == pygame.K_t:
                     triangulacija_temena()
+                    # nacrtaj_putanje(pedestrians, "red")
 
                 if event.key == pygame.K_v:
                     nacrtaj_putanje(pedestrians, "red")
@@ -210,7 +218,7 @@ def __main__():
                             # spoji_temena(centroidi, Krug(centroidi[i[0]]), )
 
                 if event.key == pygame.K_p:
-                    kretanje()
+                    kretanje() #"live" kretanje 
 
                 if event.key == pygame.K_k :
                     for i in range(len(pedestrians)):
