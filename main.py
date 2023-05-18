@@ -231,8 +231,8 @@ def __main__():
                     for i in range(len(pedestrians)):
                         poz_x = pedestrians[i].get_x()
                         poz_y = pedestrians[i].get_y()
-                        dx = putanje[i][0]
-                        dy = putanje[i][1]
+                        dx = trenutne_putanje[i][0]
+                        dy = trenutne_putanje[i][1]
                         krug = Krug(poz_x, poz_y)
                         nacrtaj_obim(krug, dx, dy)
 
