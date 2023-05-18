@@ -47,7 +47,7 @@ trenutne_putanje = []
 trouglovi = 0
 start = (0, 0)
 end = (0, 0)
-
+velocity = 0
 def nacrtaj_krug(krug : Krug, boja):
     pygame.draw.circle(screen, boja, (krug.get_x(), krug.get_y()), 4, 0)
 
@@ -59,8 +59,8 @@ def nacrtaj_putanje(pedestrians : list, color):
         # k = round(random.random() * 2 ) - 1
         # print(s, k)
         pygame.draw.line(screen, color, (i.get_x(), i.get_y()), 
-                         (i.get_x() + dx, i.get_y() + dx), 4)
-        putanje.append((i.get_x() + dx, i.get_y() + dx))
+                         (i.get_x() + velocity, i.get_y() + velocity), 4)
+        putanje.append((i.get_x() + velocity, i.get_y() + velocity))
 
 
 
@@ -178,6 +178,10 @@ def povezi_centroide():
 
 
 def __main__():
+
+    global velocity
+    velocity = random.random() * 10 # constant speed for every pedestrian
+
     global trouglovi
     global putanje
     global centroidi
