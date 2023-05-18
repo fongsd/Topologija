@@ -25,8 +25,10 @@ screen = pygame.display.set_mode((800, 600), pygame.RESIZABLE)
 screen.fill("black")
 
 putanje = []
+pocetne_putanje = []
 centroidi = []
 pedestrians = []
+trenutne_putanje = []
 trouglovi = 0
 start = (0, 0)
 end = (0, 0)
@@ -115,6 +117,7 @@ def pomeranje_pesaka():
     nacrtaj_putanje(pedestrians, "red")
     for i in range(len(pedestrians)):
             # nacrtaj_krug(pedestrians[i], "black")
+            nacrtaj_obim(pedestrians[i], putanje[i][0], putanje[i][1])
             nacrtaj_krug(pedestrians[i], "white")
             # nacrtaj_obim(pedestrians[i], putanje[i][0], putanje[i][1])
     triangulacija_temena()
@@ -190,6 +193,10 @@ def __main__():
                             krug = Krug(x_pos, y_pos)
                             nacrtaj_krug(krug, "white")
                             pedestrians.append(krug)
+                            dx = random.random() * 10
+                            dy = random.random() * 15
+                            pocetne_putanje.append((dx, dy))
+                        nacrtaj_putanje(pedestrians, "red")
                     else:
                         if br_unosa < 1:
                             start = (x, y)
@@ -205,8 +212,8 @@ def __main__():
                     triangulacija_temena()
                     # nacrtaj_putanje(pedestrians, "red")
 
-                if event.key == pygame.K_v:
-                    nacrtaj_putanje(pedestrians, "red")
+                # if event.key == pygame.K_v:
+                #     nacrtaj_trenutne_putanje(pedestrians, "red")
 
                 if event.key == pygame.K_c:
                         for i in centroidi:
