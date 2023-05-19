@@ -177,10 +177,13 @@ def povezi_centroide():
         pygame.draw.circle(screen, "blue", i, 7)    
 
 
+def heuristika(first, second):
+    return math.dist(first, second)
+
 def __main__():
 
     global velocity
-    velocity = random.random() * 10 # constant speed for every pedestrian
+    velocity = random.random() + 10 # constant speed for every pedestrian
 
     global trouglovi
     global putanje
@@ -223,6 +226,7 @@ def __main__():
                         elif br_unosa == 1:
                             end = (x, y) 
                             br_unosa+=1
+                            # print(heuristika(start, end))
                         centroidi.append((x, y))
                         pygame.draw.circle(screen, "purple", (x, y), 10)
                     pygame.display.update()     
