@@ -171,22 +171,32 @@ def euclid_distance(a,b):
     return math.dist(a,b)
 
 
+def dodaj_susede(tacka,lista): #funkcija za pronalazenje susednih cvorova u grafu kretanja
 
-###########################BAGG###############################
-def dodaj_susede(tacka,lista): 
+    susedi=[]
+    d= Delaunay(lista)
+    tmp=[]
+    ind=0
+    for i,x in enumerate(lista[d.simplices]):  
+        ind=0
+        for j,y in enumerate(x):
+            
+            if  list(y) != tacka:
+                tmp.append(list(y))
+                
+            elif list(y) == tacka:
+                ind=1
+                
+            if ind==1 and j==2:
+                [susedi.append(k) for k in tmp if k not in susedi]
 
-    # global centroidi
-    neighbours=[]
-    delauney= Delaunay(lista)
-    for i in centroidi[delauney.simplices]:  
-        if i.contains(tacka):
-            neighbours.append([l for l in i if l!=tacka]) 
+        tmp.clear()
+        
+    return susedi
 
-    return neighbours
-##############################################################
 
 def h(n):
-    H={} #mozda bi trebalo da bude globalna
+    H={} 
 
     for i in range(len(centroidi)):
         H["i".format(i)]=euclid_distance([centroidi[0][0], centroidi[0][1]],[pedestrians[i][0],pedestrians[i][1]])
@@ -240,11 +250,6 @@ def astar(G, start, stop):
         
         open_list.remove(n)
         closed_list.add(n)
-
-
-
-
-
 
 
 def __main__():
