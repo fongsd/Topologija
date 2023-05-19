@@ -106,7 +106,6 @@ def nadji_centroid(pedestrians, prvo_teme, drugo_teme, trece_teme):
 
 
 
-
 def kretanje():
     global pedestrians
     global putanje
@@ -175,6 +174,128 @@ def povezi_centroide():
 
     for i in centroidi:
         pygame.draw.circle(screen, "blue", i, 7)    
+ 
+def vreme_sudara(a_start_x, a_start_y, b_start_x, b_start_y, vxa , vya, vxb, vyb ): #racunanje po x-u  , analogno po y
+    M = np.array([[vxa , vxb ],[vya  , vyb ]])
+    cons = np.array([b_start_x - a_start_x, b_start_y - a_start_y])
+    result=np.linalg.solve(M,cons)
+    ta=round(result[0],2)
+    tb=round(result[1],2)
+    return (ta, tb) #vracamo vremena za obe tacke tj pesaka
+# ne sme t da bude negativno....
+
+def tacka_sudara(t , start_x , start_y, vx , vy): #za racunanje x koordinate tacke sudara
+    return (start_x + vx * t    , start_y + vy * t)
+
+
+def euclid_distance(a,b): 
+    return math.dist(a,b)
+
+
+def dodaj_susede(tacka,lista): #funkcija za pronalazenje susednih cvorova u grafu kretanja
+#argument lista je zapravo np.array!!!!
+    susedi=[]
+    d= Delaunay(lista)
+    tmp=[]
+    ind=0
+    for i,x in enumerate(lista[d.simplices]):  
+        ind=0
+        for j,y in enumerate(x):
+            
+            if  list(y) != tacka:
+                tmp.append(list(y))
+                
+            elif list(y) == tacka:
+                ind=1
+                
+            if ind==1 and j==2:
+                [susedi.append(k) for k in tmp if k not in susedi]
+
+        tmp.clear()
+        
+    return susedi
+
+
+def h(n):#heuristika udaljenosti od pocetka
+    H={} 
+
+    for i in range(len(centroidi)):
+        H["{}".format(i)]=euclid_distance([centroidi[0][0], centroidi[0][1]],[pedestrians[i][0],pedestrians[i][1]])
+    return H[n]
+
+def h2(n):#heuristika udaljeniosti od cilja
+    H={} 
+
+    for i in range(len(centroidi)):
+        H["{}".format(i)]=euclid_distance([centroidi[1][0], centroidi[1][1]],[pedestrians[i][0],pedestrians[i][1]])
+    return H[n]
+
+
+def indeks_suseda(tacka,lista):
+    for i,x in enumerate(lista):
+        if list(x)==list(tacka):
+            return i
+
+
+def definisi_graf(centroidi):
+    G={}
+    for i,centroid in enumerate(centroidi):
+        susedi=dodaj_susede(list(centroid),centroidi)
+        G["{}".format(i)]=[[str(indeks_suseda(j,centroidi)),euclid_distance(list(j),list(centroid))] for j in susedi]
+
+    return G
+
+# G=definisi_graf(points)  <---- points je np.array
+# G
+
+def astar(G, start, stop):
+    open_list = set([start])
+    closed_list = set([])
+    
+    g = {}      #g - dict 
+    g[start] = 0
+    
+    parents = {}
+    parents[start] = None
+    
+    iteration = 0
+    while len(open_list) > 0:
+        iteration += 1
+        n = None
+        for v in open_list:
+            if n == None or g[v] + h(v) < g[n] + h(n): 
+                n = v
+        if n == None:
+            print("Ne postoji put!")
+            return []
+        
+        if n == stop:
+            print("Postoji put!")
+            print(iteration)
+            path = [stop]
+            tmp = parents[stop]
+            while tmp != None:
+                path.append(tmp)
+                tmp = parents[tmp]
+            path.reverse()
+            return path
+        
+        for m, weight in G[n]:
+            if m not in open_list and m not in closed_list:
+                open_list.add(m)
+                parents[m] = n
+                g[m] = g[n] + weight
+            else:
+                if g[m] > g[n] + weight:
+                    g[m] = g[n] + weight
+                    parents[m] = n
+                    
+                    if m in closed_list:
+                        closed_list.remove(m)
+                        open_list.add(m)
+        
+        open_list.remove(n)
+        closed_list.add(n)
 
 
 def __main__():
