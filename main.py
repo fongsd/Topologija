@@ -188,17 +188,17 @@ def tacka_sudara(t , start_x , start_y, vx , vy): #za racunanje x koordinate tac
     return (start_x + vx * t    , start_y + vy * t)
 
 
-def euclid_distance(a,b): 
+def euclid_distance(a,b): #proveriti
     return math.dist(a,b)
 
 
 def dodaj_susede(tacka,lista): #funkcija za pronalazenje susednih cvorova u grafu kretanja
-#argument lista je zapravo np.array!!!!
     susedi=[]
-    d= Delaunay(lista)
+    lista2=np.array(lista)
+    d= Delaunay(lista2)
     tmp=[]
     ind=0
-    for i,x in enumerate(lista[d.simplices]):  
+    for i,x in enumerate(lista2[d.simplices]):  
         ind=0
         for j,y in enumerate(x):
             
@@ -220,14 +220,16 @@ def h(n):#heuristika udaljenosti od pocetka
     H={} 
 
     for i in range(len(centroidi)):
-        H["{}".format(i)]=euclid_distance([centroidi[0][0], centroidi[0][1]],[pedestrians[i][0],pedestrians[i][1]])
+        H["{}".format(i)]=random.randint(10,40)
+
+        # H["{}".format(i)]=euclid_distance(list([centroidi[0][0], centroidi[0][1]]),list([pedestrians[i][0],pedestrians[i][1]]))
     return H[n]
 
 def h2(n):#heuristika udaljeniosti od cilja
     H={} 
 
     for i in range(len(centroidi)):
-        H["{}".format(i)]=euclid_distance([centroidi[1][0], centroidi[1][1]],[pedestrians[i][0],pedestrians[i][1]])
+        H["{}".format(i)]=euclid_distance([centroidi[1][0], centroidi[1][1]],[(pedestrians[i]).get_x(),(pedestrians[i]).get_y()])
     return H[n]
 
 
@@ -271,7 +273,7 @@ def astar(G, start, stop):
         
         if n == stop:
             print("Postoji put!")
-            print(iteration)
+            # print(iteration)
             path = [stop]
             tmp = parents[stop]
             while tmp != None:
@@ -297,6 +299,15 @@ def astar(G, start, stop):
         open_list.remove(n)
         closed_list.add(n)
 
+# def napravi_listu_od_krugova(lits_krugova)
+def spoji_temena_redom(lista,color="orange"):
+    for i in range(len(lista)-1):
+         pygame.draw.line(screen, color, (lista[i][0], lista[i][1]),
+                      (lista[i+1][0],lista[i+1][1]), 7)        
+
+
+
+
 
 def __main__():
     global trouglovi
@@ -308,11 +319,12 @@ def __main__():
     br_unosa = 0
     br_linija = 0
     running = True
+    astar_indikator=0
     while running:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
-                print(br_linija)
+                # print(br_linija)
                 print(len(pedestrians))
                 break
             if event.type == pygame.KEYDOWN:
@@ -362,7 +374,26 @@ def __main__():
                             # spoji_temena(centroidi, Krug(centroidi[i[0]]), )
 
                 if event.key == pygame.K_p:
+                    astar_indikator=1
                     kretanje() #"live" kretanje 
+
+
+                if event.key == pygame.K_a and astar_indikator==1:
+                    G=definisi_graf(centroidi)
+                    s=indeks_suseda(list(start),centroidi)
+                    print("Pocetak",s)
+
+                    f=indeks_suseda(list(end),centroidi)
+                    print('Kraj',f)
+
+                    l=astar(G,str(s),str(f))
+
+                    lista_indeksa=[int(s) for s in l]
+                    print("Lista temena kroz putanje",lista_indeksa)
+                    put=[list(centroidi[k]) for k in  lista_indeksa]
+                    # print(put)
+                    spoji_temena_redom(put,"orange")
+
 
                 # if event.key == pygame.K_k :
                 #     for i in range(len(pedestrians)):
