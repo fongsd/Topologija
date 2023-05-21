@@ -52,7 +52,8 @@ def nacrtaj_krug(krug : Krug, boja):
     pygame.draw.circle(screen, boja, (krug.get_x(), krug.get_y()), 4, 0)
 
 def nacrtaj_putanje(pedestrians : list, color):
-    for i in pedestrians:
+    brzine_pesaka = []
+    for poz, i in enumerate(pedestrians):
         dx = int(random.random() * 15)
         # dy = int(random.random() * 10)
         # s = round(random.random()* 2) - 1 
@@ -61,6 +62,9 @@ def nacrtaj_putanje(pedestrians : list, color):
         pygame.draw.line(screen, color, (i.get_x(), i.get_y()), 
                          (i.get_x() + velocity, i.get_y() + velocity), 4)
         putanje.append((i.get_x() + velocity, i.get_y() + velocity))
+        brzine_pesaka.append(((i.get_x(), i.get_y()), velocity)) # lista parova (pozicija pesaka, njegova brzina)
+
+    return brzine_pesaka
 
 
 
@@ -97,7 +101,17 @@ def spoji_centroide(prvo, drugo, trece):
     pygame.draw.line(screen, "green", (prvo[0], prvo[1]), (drugo[0], drugo[1]), 2)
     pygame.draw.line(screen, "green", (prvo[0], prvo[1]), (trece[0], trece[1]), 2)
     pygame.draw.line(screen, "green", (trece[0], trece[1]), (drugo[0], drugo[1]), 2)
+    # da li nam je potreban skup brzina izmedju dva suseda ili mogu da se ponavljaju?
+    return [prvo, drugo, trece]
 
+
+def brzine_centroida(prvo_teme, drugo_teme):
+    vx_first = prvo_teme[0]
+    vy_first = prvo_teme[1]
+    vx_second = drugo_teme[0]
+    vy_second = drugo_teme[1]
+
+    return math.dist(prvo_teme, drugo_teme)
 
 def nadji_centroid(pedestrians, prvo_teme, drugo_teme, trece_teme):
     x_coord = (pedestrians[prvo_teme].get_x() + pedestrians[drugo_teme].get_x() + pedestrians[trece_teme].get_x())/3
@@ -127,19 +141,28 @@ def kretanje():
 def pomeranje_pesaka():
     global pedestrians
     global putanje
+    global velocity
     stari = copy.deepcopy(pedestrians)
-    nacrtaj_putanje(pedestrians, "red")
+    brzine_pesaka = nacrtaj_putanje(pedestrians, "red")
     for i in range(len(pedestrians)):
             # nacrtaj_krug(pedestrians[i], "black")
             nacrtaj_obim(pedestrians[i], putanje[i][0], putanje[i][1])
             nacrtaj_krug(pedestrians[i], "white")
             # nacrtaj_obim(pedestrians[i], putanje[i][0], putanje[i][1])
-    triangulacija_temena()
+    susedni_centroidi = triangulacija_temena()
     for i in range(len(pedestrians)):
             pedestrians[i] = Krug(putanje[i][0], putanje[i][1])
             # pygame.draw.line(screen, "black", (pedestrians[i].get_x(), pedestrians[i].get_y())
                                             #    , (stari[i].get_x(), stari[i].get_y()), 4)
-    
+    for pesak, brzina in brzine_pesaka:
+        for i in susedni_centroidi:
+            for j in i:
+                print(vreme_sudara(pesak[0], pesak[1], j[0], j[1], brzina, brzina, 10, 5)) 
+                # dalje sacuvati listu parova
+                # (pesak, centroid, brzina_pesaka, brzina iz centroida, vreme sudara )
+                # i na osnovu toga izracunati predjene puteve 
+
+
 def pomeranje_centroida():
     pass
 
@@ -164,16 +187,21 @@ def triangulacija_temena():
         spoji_temena(pedestrians, trougao[0], trougao[1], trougao[2])
         centroid = nadji_centroid(pedestrians, trougao[0], trougao[1], trougao[2])
         centroidi.append(centroid)
-    povezi_centroide()
+    return povezi_centroide()
 
 def povezi_centroide():
+    lista_susednih_temena_triangulacije = []
     global centroidi
     triCentroid = Delaunay(centroidi)
     for i in triCentroid.simplices:
-        spoji_centroide(centroidi[i[0]], centroidi[i[1]], centroidi[i[2]])
+        tmp_lista =  spoji_centroide(centroidi[i[0]], centroidi[i[1]], centroidi[i[2]])
+        lista_susednih_temena_triangulacije.append(tmp_lista) # lista susednih temena centroida
 
+    # for i in lista_susednih_temena_triangulacije:
+    #     print(i)
     for i in centroidi:
         pygame.draw.circle(screen, "blue", i, 7)    
+    return lista_susednih_temena_triangulacije
  
 def vreme_sudara(a_start_x, a_start_y, b_start_x, b_start_y, vxa , vya, vxb, vyb ): #racunanje po x-u  , analogno po y
     M = np.array([[vxa , vxb ],[vya  , vyb ]])
