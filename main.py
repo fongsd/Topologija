@@ -303,7 +303,9 @@ def astar(G, start, stop):
 def spoji_temena_redom(lista,color="orange"):
     for i in range(len(lista)-1):
          pygame.draw.line(screen, color, (lista[i][0], lista[i][1]),
-                      (lista[i+1][0],lista[i+1][1]), 7)        
+                      (lista[i+1][0],lista[i+1][1]), 7) 
+         pygame.display.update()
+         time.sleep(0.5)      
 
 
 
