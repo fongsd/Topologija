@@ -54,15 +54,15 @@ def nacrtaj_krug(krug : Krug, boja):
 def nacrtaj_putanje(pedestrians : list, color):
     brzine_pesaka = []
     for poz, i in enumerate(pedestrians):
-        dx = int(random.random() * 100)
-        # dy = int(random.random() * 10)
+        dx = int(random.random() * 3)
+        dy = int(random.random() * 3)
         # s = round(random.random()* 2) - 1 
         # k = round(random.random() * 2 ) - 1
         # print(s, k)
         pygame.draw.line(screen, color, (i.get_x(), i.get_y()), 
-                         (i.get_x() + velocity, i.get_y() + velocity), 4)
-        putanje.append((i.get_x() + velocity, i.get_y() + velocity))
-        brzine_pesaka.append(((i.get_x(), i.get_y()), velocity)) # lista parova (pozicija pesaka, njegova brzina)
+                         (i.get_x() + dx * velocity, i.get_y() + dy * velocity), 4)
+        putanje.append((i.get_x() + dx * velocity, i.get_y() + dy * velocity))
+        brzine_pesaka.append(((i.get_x(), i.get_y()), (dx * velocity, dy * velocity))) # lista parova (pozicija pesaka, njegova brzina)
 
     return brzine_pesaka
 
@@ -166,7 +166,7 @@ def pomeranje_pesaka():
             # #### intersection between pedestrian and first, second centroid
             vektor_v = (second[0] - first[0], second[1] - first[1])
             vektor_u = (trenutna_pozicija[0] - first[0], trenutna_pozicija[1] - first[1])
-            sledeca_pozicija_pesaka = (trenutna_pozicija[0] + putanja, trenutna_pozicija[1] + putanja)
+            sledeca_pozicija_pesaka = (trenutna_pozicija[0] + putanja[0], trenutna_pozicija[1] + putanja[1])
             vektor_W = (sledeca_pozicija_pesaka[0] - first[0], sledeca_pozicija_pesaka[1] - first[1])
             
 
@@ -186,7 +186,7 @@ def pomeranje_pesaka():
             # #### intersection between pedestrian and first, third centroid
             vektor_v = (third[0] - first[0], third[1] - first[1])
             vektor_u = (trenutna_pozicija[0] - first[0], trenutna_pozicija[1] - first[1])
-            sledeca_pozicija_pesaka = (trenutna_pozicija[0] + putanja, trenutna_pozicija[1] + putanja)
+            sledeca_pozicija_pesaka = (trenutna_pozicija[0] + putanja[0], trenutna_pozicija[1] + putanja[1])
             vektor_W = (sledeca_pozicija_pesaka[0] - first[0], sledeca_pozicija_pesaka[1] - first[1])
             
             # pygame.draw.line(screen, "yellow", first, third, 5)
@@ -206,7 +206,7 @@ def pomeranje_pesaka():
             #### intersection between pedestrian and second, third centroid
             vektor_v = (third[0] - second[0], third[1] - second[1])
             vektor_u = (trenutna_pozicija[0] - second[0], trenutna_pozicija[1] - second[1])
-            sledeca_pozicija_pesaka = (trenutna_pozicija[0] + putanja, trenutna_pozicija[1] + putanja)
+            sledeca_pozicija_pesaka = (trenutna_pozicija[0] + putanja[0], trenutna_pozicija[1] + putanja[1])
             vektor_W = (sledeca_pozicija_pesaka[0] - second[0], sledeca_pozicija_pesaka[1] - second[1])
 
             # pygame.draw.line(screen, "yellow", second, third, 5)
