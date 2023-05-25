@@ -54,7 +54,7 @@ def nacrtaj_krug(krug : Krug, boja):
 def nacrtaj_putanje(pedestrians : list, color):
     brzine_pesaka = []
     for poz, i in enumerate(pedestrians):
-        dx = int(random.random() * 15)
+        dx = int(random.random() * 100)
         # dy = int(random.random() * 10)
         # s = round(random.random()* 2) - 1 
         # k = round(random.random() * 2 ) - 1
@@ -126,6 +126,7 @@ def kretanje():
     for i in range(10):
         screen.fill("black")
         pomeranje_pesaka()
+
         # triangulacija_temena()
         # pomeranje_centroida()
 
@@ -143,28 +144,107 @@ def pomeranje_pesaka():
     global putanje
     global velocity
     stari = copy.deepcopy(pedestrians)
-    brzine_pesaka = nacrtaj_putanje(pedestrians, "red")
+    brzine_pesaka = nacrtaj_putanje(pedestrians, "red") # uredjen par (trenutna pozicija pesaka, brzina == sledeca pozicija)
     for i in range(len(pedestrians)):
             # nacrtaj_krug(pedestrians[i], "black")
             nacrtaj_obim(pedestrians[i], putanje[i][0], putanje[i][1])
             nacrtaj_krug(pedestrians[i], "white")
             # nacrtaj_obim(pedestrians[i], putanje[i][0], putanje[i][1])
-    susedni_centroidi = triangulacija_temena()
+    susedni_centroidi = triangulacija_temena() # lista listi susednih temena
     for i in range(len(pedestrians)):
             pedestrians[i] = Krug(putanje[i][0], putanje[i][1])
             # pygame.draw.line(screen, "black", (pedestrians[i].get_x(), pedestrians[i].get_y())
                                             #    , (stari[i].get_x(), stari[i].get_y()), 4)
-    for pesak, brzina in brzine_pesaka:
-        for i in susedni_centroidi:
-            for j in i:
-                print(vreme_sudara(pesak[0], pesak[1], j[0], j[1], brzina, brzina, 10, 5)) 
-                # dalje sacuvati listu parova
-                # (pesak, centroid, brzina_pesaka, brzina iz centroida, vreme sudara )
-                # i na osnovu toga izracunati predjene puteve 
+    for i in susedni_centroidi: # susedna temena
+        first = i[0] # prvo teme
+        second = i[1] # drugo teme
+        third = i[2] # trece teme
+
+
+
+        for (trenutna_pozicija, putanja) in brzine_pesaka:
+            # #### intersection between pedestrian and first, second centroid
+            vektor_v = (second[0] - first[0], second[1] - first[1])
+            vektor_u = (trenutna_pozicija[0] - first[0], trenutna_pozicija[1] - first[1])
+            sledeca_pozicija_pesaka = (trenutna_pozicija[0] + putanja, trenutna_pozicija[1] + putanja)
+            vektor_W = (sledeca_pozicija_pesaka[0] - first[0], sledeca_pozicija_pesaka[1] - first[1])
+            
+
+            # pygame.draw.line(screen, "yellow", first, second, 5)
+            if angle(first, second, trenutna_pozicija):
+                if orijentacija(vektor_v, vektor_u) != orijentacija(vektor_v, vektor_W) :
+                    pygame.draw.line(screen, "red", first, second, 5)
+                    print(orijentacija(vektor_v, vektor_u), orijentacija(vektor_v, vektor_W))
+                    nacrtaj_krug(Krug(trenutna_pozicija[0], trenutna_pozicija[1]), "red")
+                    nacrtaj_krug(Krug(sledeca_pozicija_pesaka[0], sledeca_pozicija_pesaka[1]), "red")
+                    pygame.display.update()
+                    time.sleep(1)
+        
+            # ##### end
+
+
+            # #### intersection between pedestrian and first, third centroid
+            vektor_v = (third[0] - first[0], third[1] - first[1])
+            vektor_u = (trenutna_pozicija[0] - first[0], trenutna_pozicija[1] - first[1])
+            sledeca_pozicija_pesaka = (trenutna_pozicija[0] + putanja, trenutna_pozicija[1] + putanja)
+            vektor_W = (sledeca_pozicija_pesaka[0] - first[0], sledeca_pozicija_pesaka[1] - first[1])
+            
+            # pygame.draw.line(screen, "yellow", first, third, 5)
+         
+            if angle(first, third, trenutna_pozicija):
+                if orijentacija(vektor_v, vektor_u) != orijentacija(vektor_v, vektor_W) :
+                    pygame.draw.line(screen, "red", first, third, 5)
+                    print(orijentacija(vektor_v, vektor_u), orijentacija(vektor_v, vektor_W))
+                    nacrtaj_krug(Krug(trenutna_pozicija[0], trenutna_pozicija[1]), "red")
+                    nacrtaj_krug(Krug(sledeca_pozicija_pesaka[0], sledeca_pozicija_pesaka[1]), "red")
+                    pygame.display.update()
+                    time.sleep(1)
+        
+            # ##### end
+            
+
+            #### intersection between pedestrian and second, third centroid
+            vektor_v = (third[0] - second[0], third[1] - second[1])
+            vektor_u = (trenutna_pozicija[0] - second[0], trenutna_pozicija[1] - second[1])
+            sledeca_pozicija_pesaka = (trenutna_pozicija[0] + putanja, trenutna_pozicija[1] + putanja)
+            vektor_W = (sledeca_pozicija_pesaka[0] - second[0], sledeca_pozicija_pesaka[1] - second[1])
+
+            # pygame.draw.line(screen, "yellow", second, third, 5)
+         
+            if angle(second, third, trenutna_pozicija):
+                if orijentacija(vektor_v, vektor_u) != orijentacija(vektor_v, vektor_W) :
+                    pygame.draw.line(screen, "red", third, second, 5)
+                    print(orijentacija(vektor_v, vektor_u), orijentacija(vektor_v, vektor_W))
+                    nacrtaj_krug(Krug(trenutna_pozicija[0], trenutna_pozicija[1]), "red")
+                    nacrtaj_krug(Krug(sledeca_pozicija_pesaka[0], sledeca_pozicija_pesaka[1]), "red")
+                    pygame.display.update()
+                    time.sleep(1)
+        
+            ##### end
 
 
 def pomeranje_centroida():
     pass
+
+
+def angle(first, second, third): # two end points and pedestrian point
+    vektor_u = (second[0] - first[0], second[1] - first[1])
+    vektor_v = (third[0] - first[0], third[1] - first[1])
+    vektor_w = (second[0] - third[0], second[1] - third[1])
+
+    a1 = vektor_u[0] * vektor_v[0] + vektor_u[1] * vektor_v[1]
+    b1 = math.sqrt(vektor_u[0] * vektor_u[0] + vektor_u[1] * vektor_u[1]) * math.sqrt(vektor_v[0] * vektor_v[0] + vektor_v[1] * vektor_v[1])
+
+    degree1 = math.degrees(math.acos(a1/b1))
+
+
+    a2 = vektor_u[0] * vektor_w[0] + vektor_u[1] * vektor_w[1]
+    b2 = math.sqrt(vektor_u[0] * vektor_u[0] + vektor_u[1] * vektor_u[1]) * math.sqrt(vektor_w[0] * vektor_w[0] + vektor_w[1] * vektor_w[1])
+
+    degree2 = math.degrees(math.acos(a2/b2))
+
+    print(degree1, degree2)
+    return degree1 <= 90 and degree2 <= 90
 
 
 def triangulacija_temena():
@@ -194,7 +274,7 @@ def povezi_centroide():
     global centroidi
     triCentroid = Delaunay(centroidi)
     for i in triCentroid.simplices:
-        tmp_lista =  spoji_centroide(centroidi[i[0]], centroidi[i[1]], centroidi[i[2]])
+        tmp_lista =  spoji_centroide(centroidi[i[0]], centroidi[i[1]], centroidi[i[2]]) # fja vraca [prva, druga, treca]
         lista_susednih_temena_triangulacije.append(tmp_lista) # lista susednih temena centroida
 
     # for i in lista_susednih_temena_triangulacije:
@@ -328,6 +408,12 @@ def astar(G, start, stop):
 
 def heuristika(first, second):
     return math.dist(first, second)
+
+
+def orijentacija(first, second):
+
+    return np.linalg.det([first, second]) >= 0 
+
 
 def __main__():
 
