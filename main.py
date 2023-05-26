@@ -36,7 +36,7 @@ pygame.init()
 
 
 
-screen = pygame.display.set_mode((800, 600), pygame.RESIZABLE)
+screen = pygame.display.set_mode((1200, 1000), pygame.RESIZABLE)
 screen.fill("black")
 
 putanje = []
@@ -125,7 +125,7 @@ def kretanje():
     global putanje
     for i in range(10):
         screen.fill("black")
-        pomeranje_pesaka()
+        nedstupni_pesaci = pomeranje_pesaka()
 
         # triangulacija_temena()
         # pomeranje_centroida()
@@ -145,6 +145,8 @@ def pomeranje_pesaka():
     global velocity
     stari = copy.deepcopy(pedestrians)
     brzine_pesaka = nacrtaj_putanje(pedestrians, "red") # uredjen par (trenutna pozicija pesaka, brzina == sledeca pozicija)
+    
+    nedostupni_centroidi = set()
     for i in range(len(pedestrians)):
             # nacrtaj_krug(pedestrians[i], "black")
             nacrtaj_obim(pedestrians[i], putanje[i][0], putanje[i][1])
@@ -178,7 +180,9 @@ def pomeranje_pesaka():
                     nacrtaj_krug(Krug(trenutna_pozicija[0], trenutna_pozicija[1]), "red")
                     nacrtaj_krug(Krug(sledeca_pozicija_pesaka[0], sledeca_pozicija_pesaka[1]), "red")
                     pygame.display.update()
-                    time.sleep(1)
+                    time.sleep(0.25)
+                    nedostupni_centroidi.add(first)
+                    nedostupni_centroidi.add(second)
         
             # ##### end
 
@@ -198,7 +202,9 @@ def pomeranje_pesaka():
                     nacrtaj_krug(Krug(trenutna_pozicija[0], trenutna_pozicija[1]), "red")
                     nacrtaj_krug(Krug(sledeca_pozicija_pesaka[0], sledeca_pozicija_pesaka[1]), "red")
                     pygame.display.update()
-                    time.sleep(1)
+                    time.sleep(0.25)
+                    nedostupni_centroidi.add(first)
+                    nedostupni_centroidi.add(third)
         
             # ##### end
             
@@ -218,11 +224,13 @@ def pomeranje_pesaka():
                     nacrtaj_krug(Krug(trenutna_pozicija[0], trenutna_pozicija[1]), "red")
                     nacrtaj_krug(Krug(sledeca_pozicija_pesaka[0], sledeca_pozicija_pesaka[1]), "red")
                     pygame.display.update()
-                    time.sleep(1)
+                    time.sleep(0.25)
+                    nedostupni_centroidi.add(third)
+                    nedostupni_centroidi.add(second)
         
             ##### end
 
-
+    return nedostupni_centroidi
 def pomeranje_centroida():
     pass
 
@@ -444,7 +452,7 @@ def __main__():
                     x, y = pygame.mouse.get_pos()
                     x = int(x)
                     if x >= 10 and x <= 60 and y >= 10 and y<=40:
-                        for i in range(6):
+                        for i in range(25):
                             x_pos = abs(random.random() * screen.get_width() - 200) + 100 # da ne bi bili previse blizu ivici
                             y_pos = abs(random.random() * screen.get_height() - 200) + 100
                             krug = Krug(x_pos, y_pos)
