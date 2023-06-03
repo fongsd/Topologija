@@ -3,6 +3,7 @@ import random
 import time
 import math
 from krug import Krug
+import json
 from scipy.spatial import Delaunay
 import numpy as np
 import copy
@@ -43,26 +44,33 @@ putanje = []
 pocetne_putanje = []
 centroidi = []
 pedestrians = []
+trajectories = []
 trenutne_putanje = []
 trouglovi = 0
 start = (0, 0)
 end = (0, 0)
 velocity = 0
+
+indikator_inicijalizacije=0
+dx=[]
+dy=[]
+
 def nacrtaj_krug(krug : Krug, boja):
     pygame.draw.circle(screen, boja, (krug.get_x(), krug.get_y()), 4, 0)
 
-def nacrtaj_putanje(pedestrians : list, color):
+def ucitaj_pesake():
+    file_path = open("podaci.json", "r")
+    podaci = json.load(file_path)
+    return podaci
+
+def nacrtaj_putanje(pedestrians : list, trajectories : list, color):
+    global velocity 
     brzine_pesaka = []
-    for poz, i in enumerate(pedestrians):
-        dx = int(random.random() * 3)
-        dy = int(random.random() * 3)
-        # s = round(random.random()* 2) - 1 
-        # k = round(random.random() * 2 ) - 1
-        # print(s, k)
-        pygame.draw.line(screen, color, (i.get_x(), i.get_y()), 
-                         (i.get_x() + dx * velocity, i.get_y() + dy * velocity), 4)
-        putanje.append((i.get_x() + dx * velocity, i.get_y() + dy * velocity))
-        brzine_pesaka.append(((i.get_x(), i.get_y()), (dx * velocity, dy * velocity))) # lista parova (pozicija pesaka, njegova brzina)
+    for i in range(len(pedestrians)):
+        pygame.draw.line(screen, color, (pedestrians[i].get_x(), pedestrians[i].get_y()), 
+                         (pedestrians[i].get_x() + trajectories[i][0] * velocity, pedestrians[i].get_y() + trajectories[i][1] * velocity), 4)
+        putanje.append((pedestrians[i].get_x() + trajectories[i][0] * velocity , pedestrians[i].get_y() + trajectories[i][1] * velocity))
+        brzine_pesaka.append(((pedestrians[i].get_x(), pedestrians[i].get_y()), (trajectories[i][0] * velocity, trajectories[i][1] * velocity))) # lista parova (pozicija pesaka, njegova brzina)
 
     return brzine_pesaka
 
@@ -133,7 +141,7 @@ def kretanje():
 
         putanje = []
         pygame.display.update()
-        time.sleep(1)
+        time.sleep(0.5)
     screen.fill("black")
     pomeranje_pesaka()
     pygame.display.update()
@@ -144,7 +152,7 @@ def pomeranje_pesaka():
     global putanje
     global velocity
     stari = copy.deepcopy(pedestrians)
-    brzine_pesaka = nacrtaj_putanje(pedestrians, "red") # uredjen par (trenutna pozicija pesaka, brzina == sledeca pozicija)
+    brzine_pesaka = nacrtaj_putanje(pedestrians, trajectories, "red") # uredjen par (trenutna pozicija pesaka, brzina == sledeca pozicija)
     
     nedostupni_centroidi = set()
     for i in range(len(pedestrians)):
@@ -440,11 +448,13 @@ def __main__():
 
     global velocity
     velocity = random.random() + 10 # constant speed for every pedestrian
-
+    podaci = dict()
+    podaci = ucitaj_pesake()
     global trouglovi
     global putanje
     global centroidi
     nacrtaj_dugme()
+    global trajectories 
     global start, end
     global pedestrians
     br_unosa = 0
@@ -466,16 +476,15 @@ def __main__():
                     x, y = pygame.mouse.get_pos()
                     x = int(x)
                     if x >= 10 and x <= 60 and y >= 10 and y<=40:
-                        for i in range(25):
-                            x_pos = abs(random.random() * screen.get_width() - 200) + 100 # da ne bi bili previse blizu ivici
-                            y_pos = abs(random.random() * screen.get_height() - 200) + 100
-                            krug = Krug(x_pos, y_pos)
+                        for k, v in podaci.items():
+                            print(k)
+                            krug = Krug(v[0][0], v[0][1])
                             nacrtaj_krug(krug, "white")
                             pedestrians.append(krug)
-                            dx = random.random() * 10
-                            dy = random.random() * 15
-                            pocetne_putanje.append((dx, dy))
-                        nacrtaj_putanje(pedestrians, "red")
+                            dx = v[1][0]
+                            dy = v[1][1]
+                            trajectories.append((dx, dy))
+                        nacrtaj_putanje(pedestrians, trajectories, "red")
                     elif br_unosa<2:
                         if br_unosa < 1:
                             start = (x, y)
