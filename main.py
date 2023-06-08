@@ -148,6 +148,7 @@ def nadji_centroid(pedestrians, prvo_teme, drugo_teme, trece_teme):
     return (x_coord, y_coord)
 
 def indeks_najblizeg_centroida(c):
+    global centroidi
     distance=float('inf')
     indeks=0
     for i,centroid in enumerate(centroidi):
@@ -156,6 +157,7 @@ def indeks_najblizeg_centroida(c):
             distance=dist
             indeks=i
     
+    print("############INDEKS:",indeks,centroidi[indeks])
     return indeks
 
 
@@ -201,30 +203,30 @@ def kretanje():
                 c_tmp=copy.deepcopy(centroidi[int(tmp[1])])
             else:
                 c_tmp=copy.deepcopy(centroidi[int(tmp[0])])
+
+        if len(path)==1:
+            # # indeks=indeks_najblizeg_centroida(c_tmp)
+            # if tmp not in l:
+            #     # lista_koordinata.append(list(int_tmp))
+            #     lista_koordinata.append(list(c_tmp))
+
+            #     l.append(tmp)
+            break
+
+        elif len(path)==0 and len(tmp)==0:
+            l=[]
+            break
+
+        elif len(path)>1:
+            if tmp not in l:
+                lista_koordinata.append(list(c_tmp))
+                l.append(tmp)
             
 
         pomeranje_pesaka()
         # G=definisi_graf(centroidi)
         pygame.display.update()
         time.sleep(1)    
-
-        if len(path)==1:
-            # indeks=indeks_najblizeg_centroida(c_tmp)
-            # if tmp not in l:
-            #     # lista_koordinata.append(list(int_tmp))
-            #     lista_koordinata.append(list(c_tmp))
-
-            #     l.append(tmp)
-                break
-
-        if len(path)==0 and len(tmp)==0:
-            l=[]
-            break
-
-        if len(path)>0:
-            if tmp not in l:
-                lista_koordinata.append(list(c_tmp))
-                l.append(tmp)
 
         print(l) 
         print("Lista koordinata",lista_koordinata)
@@ -252,8 +254,8 @@ def kretanje():
 
 
 def pomeranje_pesaka():
-    print("############################# ITERACIJA ######################")
     
+    print("############################# ITERACIJA ######################")
     global centroidi
     global pedestrians
     global putanje
@@ -281,6 +283,10 @@ def pomeranje_pesaka():
     # susedni_centroidi = triangulacija_temena() # lista listi susednih temena
 
 def provera_grane(fst,scnd):
+    global centroidi
+    global pedestrians
+    global putanje
+    global velocity
 
     print("Centroids length:",len(centroidi))
     nedozvoljene_putanja=[]            
@@ -659,6 +665,215 @@ def orijentacija(first, second):
     return np.linalg.det([first, second]) >= 0 
 
 
+def orientation(p, q, r):
+    val = (q[1] - p[1]) * (r[0] - q[0]) - (q[0] - p[0]) * (r[1] - q[1])
+    if val == 0:
+        return 0  
+    elif val > 0:
+        return 1 
+    else:
+        return -1  
+
+# prava B
+def tacke_sa_razlicite_strane_prave(A, B, A1_index, A2_index, B1_index, B2_index):
+    A1 = A[A1_index]
+    A2 = A[A2_index]
+    B1 = B[B1_index]
+    B2 = B[B2_index]
+
+    o1 = orientation(B1, B2, A1)
+    o2 = orientation(B1, B2, A2)
+
+    if o1 != o2:
+        return True  # Tacke su na razlicitoj strani
+    else:
+        return False  # Tacke su na istoj strani
+
+#funkcija kojom dobijamo a,b,c iz opsteg oblika prave(ax+by+c=0)
+def jednacina_prave(point1,point2):
+    a=list(point2)[1]-list(point1)[1] #y2-y1
+    b=list(point1)[0]-list(point2)[0] #x1-x2
+    c=list(point2)[1]*list(point1)[0] -list(point2)[1]*list(point1)[0]
+    # c = y1 * x2 - y2 * x1
+    return a,b,c
+
+def rastojanje_tacke_od_prave(point,a,b,c):
+    x1 = list(point)[0]
+    y1 = list(point)[1]
+    d = abs(a*x1 + b*y1 + c) / (math.sqrt(a**2 + b**2)+0.001)
+
+    return d
+
+def pronadji_najblize_pesake(lista, path):
+    
+    lista_pesaka=[]
+    
+    for p in lista:
+        lista_pesaka.append([p.get_x(),p.get_y()])
+    
+    pivot=[10,799] #donji levi ugao
+    l1=[]
+    l2=[]
+    above=[]
+    below=[]
+    
+    for i,p in enumerate(lista_pesaka):
+        if tacke_sa_razlicite_strane_prave(lista_pesaka,path,0,i,0,1):
+            l1.append(p)
+
+    [l2.append(p) for p in lista_pesaka if p not in l1]
+    
+    tmp_lista=[]
+    if len(l1)>0:
+        tmp_lista=[l1[0],pivot]
+    else:
+        tmp_lista=[l2[0],pivot]
+
+    if tacke_sa_razlicite_strane_prave(tmp_lista,path,0,1,0,1):
+        if len(l1)>0:
+            above=l1
+            below=l2
+        else:
+            above=l2
+            below=l1
+    else:
+        if len(l1)>0:
+            above=l2
+            below=l1
+        else:
+            above=l1
+            below=l2
+
+    tmp_distance=[]
+    distances1=[]
+    distances2=[]
+
+    pygame.draw.line(screen,"purple", (path[0][0],path[0][1]),(path[1][0],path[1][1]), 7)
+    a,b,c=jednacina_prave(path[0],path[1])
+
+
+    for pesak in below:
+        distances1.append(rastojanje_tacke_od_prave(pesak,a,b,c))
+    
+    tmp_distance=copy.deepcopy(distances1)
+    distances1=sorted(distances1)
+    below1=[]
+    # if len(bellow)>=4:
+    #     for i in range(4):
+    #         indeks=tmp_distance.index(distances1[i])
+    #         bellow1.append(bellow[indeks])
+    # else:
+    below1=below
+
+
+
+    for pesak in above:
+        distances2.append(rastojanje_tacke_od_prave(pesak,a,b,c))
+
+    distances2sorted=[]
+    tmp_distance2=copy.deepcopy(distances2)
+    distances2sorted=sorted(distances2,reverse=True)
+
+    # above1=[]
+    # if len(above)>=4:
+    #     for i in range(4):
+    #         indeks=tmp_distance2.index(distances2sorted[i])
+    #         above1.append(above[indeks])
+    # else:
+    above1=above
+
+    return above1,below1
+#funkcija koja vraca iz liste pesaka najblizeg zadatoj pravoj
+def nadji_najblizeg_putu(lista_pesaka,put1,put2):
+
+    a,b,c=jednacina_prave(put1,put2)
+    distances=[]
+    for p in lista_pesaka:
+        distances.append(rastojanje_tacke_od_prave(p,a,b,c))
+
+    distances_tmp=copy.deepcopy(distances)
+    distances=sorted(distances)
+
+    najblizi_pesak=lista_pesaka[distances_tmp.index(distances[0])]
+    
+    return najblizi_pesak
+
+def nadji_najblizeg_tacki(lista_pesaka,p1):
+    distances=[]
+    for p in lista_pesaka:
+        distances.append(euclid_distance(list(p),list(p1)))
+
+    distances_tmp=copy.deepcopy(distances)
+    distances=sorted(distances)
+
+    najblizi_pesak=lista_pesaka[distances_tmp.index(distances[0])]
+    
+    return najblizi_pesak
+
+def dinamicki_kanal(pesaci , putanja):
+    
+    above = []
+    below = []
+    above_result=[]
+    below_result=[]
+    
+    for i in range(len(putanja)-1):
+        above2=[]
+        below2=[]
+        above2, below2 = pronadji_najblize_pesake(pesaci ,[putanja[i],putanja[i+1]])
+        [above.append(a) for a in above2]
+        [below.append(b) for b in below2]
+
+        # above.append(above2)
+        # bellow.append(bellow2)
+        above=sorted(above)
+        below=sorted(below)
+        # print("ABOVE_:",above)
+        # print("BELLOW_:",bellow)
+
+        
+        if len(above)>0 and len(below)>0:
+            a_tmp=[a for a in above if a[0]>putanja[i][0] and a[0]<putanja[i+1][0] and a[1]<putanja[i][1]]
+            if len(a_tmp)>0:
+                najblizi_pesak=nadji_najblizeg_tacki(a_tmp,putanja[i])
+                above_result.append(najblizi_pesak)
+
+            b_tmp=[b for b in below if b[0]>putanja[i][0] and b[0]<putanja[i+1][0] ]
+            if len(b_tmp)>0:
+                najblizi_pesak=nadji_najblizeg_tacki(b_tmp,putanja[i])
+                below_result.append(najblizi_pesak)
+                # bellow_result.append(b_tmp[0])
+            
+            # print("ABOVE_RESULT:",above_result)
+            # print("BELLOW_RESULT:",bellow_result)
+
+
+
+    return above_result,below_result
+
+def pronalazenjet1t2( lista , vektori, i, j, dthresh=30):
+    cx=lista[i][0]-lista[j][0]
+    cy=lista[i][1]-lista[j][1]
+
+    vx=vektori[i][0]-vektori[j][0]
+    vy=vektori[i][1]-vektori[j][1]
+
+    pod_korenom=8*cx*vx*cy*vy - 4*cx*cx*vy*vy - 4*cy*cy*vx*vx + 4*dthresh*dthresh*vx*vx + 4*dthresh*dthresh*vy*vy
+    
+    if pod_korenom<0:
+        return None
+
+    t1= (- 2 * cx * vx - 2 * cx * vx - math.sqrt(pod_korenom))/( 2 * cx*cx + 2 * cy*cy - 2 * dthresh*dthresh)
+    t2= (- 2 * cx * vx - 2 * cx * vx + math.sqrt(pod_korenom))/( 2 * cx*cx + 2 * cy*cy - 2 * dthresh*dthresh)
+        
+    if t1==t2:
+        return (t1,None)
+
+    else:
+        return (t1,t2)
+
+
+
 def __main__():
 
     global velocity
@@ -691,7 +906,7 @@ def __main__():
                     x, y = pygame.mouse.get_pos()
                     x = int(x)
                     if x >= 10 and x <= 60 and y >= 10 and y<=40:
-                        for i in range(10):
+                        for i in range(15):
                             x_pos = abs(random.random() * screen.get_width() - 200) + 100 # da ne bi bili previse blizu ivici
                             y_pos = abs(random.random() * screen.get_height() - 200) + 100
                             krug = Krug(x_pos, y_pos)
@@ -743,7 +958,21 @@ def __main__():
 
                     lista_koordinata=kretanje() #"live" kretanje 
 
+                if event.key == pygame.K_q:
+                    l=[]
+                    l.append(lista_koordinata[0])
+                    l.append(lista_koordinata[1])
+                    # print("PATH(l)",l)
+                    above , below=pronadji_najblize_pesake(list(pedestrians),l)
+                   
+                    spoji_temena_redom(sorted(above),"red")
+                    spoji_temena_redom(sorted(below),"blue")
+                    
+                    above_r,below_r=dinamicki_kanal(pedestrians,lista_koordinata)
 
+                    spoji_temena_redom(above_r,"pink")
+                    spoji_temena_redom(below_r,"yellow")
+                    
                 if event.key == pygame.K_d:
                     x=[i[0] for i in lista_koordinata]
                     y=[800-i[1] for i in lista_koordinata]
