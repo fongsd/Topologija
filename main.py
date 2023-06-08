@@ -141,9 +141,9 @@ def kretanje():
 
         putanje = []
         pygame.display.update()
-        time.sleep(0.5)
-    screen.fill("black")
-    pomeranje_pesaka()
+        time.sleep(0.1)
+    # screen.fill("black")
+    # pomeranje_pesaka()
     pygame.display.update()
 
 
@@ -162,7 +162,7 @@ def pomeranje_pesaka():
             # nacrtaj_obim(pedestrians[i], putanje[i][0], putanje[i][1])
     susedni_centroidi = triangulacija_temena() # lista listi susednih temena
     for i in range(len(pedestrians)):
-            pedestrians[i] = Krug(putanje[i][0], putanje[i][1])
+            pedestrians[i] = Krug(putanje[i][0], putanje[i][1]) #getting next position
             # pygame.draw.line(screen, "black", (pedestrians[i].get_x(), pedestrians[i].get_y())
                                             #    , (stari[i].get_x(), stari[i].get_y()), 4)
     for i in susedni_centroidi: # susedna temena
@@ -184,11 +184,10 @@ def pomeranje_pesaka():
             if angle(first, second, trenutna_pozicija):
                 if orijentacija(vektor_v, vektor_u) != orijentacija(vektor_v, vektor_W) :
                     pygame.draw.line(screen, "red", first, second, 5)
-                    print(orijentacija(vektor_v, vektor_u), orijentacija(vektor_v, vektor_W))
                     nacrtaj_krug(Krug(trenutna_pozicija[0], trenutna_pozicija[1]), "red")
                     nacrtaj_krug(Krug(sledeca_pozicija_pesaka[0], sledeca_pozicija_pesaka[1]), "red")
                     pygame.display.update()
-                    time.sleep(0.25)
+                    time.sleep(0.05)
                     nedostupni_centroidi.add(first)
                     nedostupni_centroidi.add(second)
         
@@ -206,11 +205,10 @@ def pomeranje_pesaka():
             if angle(first, third, trenutna_pozicija):
                 if orijentacija(vektor_v, vektor_u) != orijentacija(vektor_v, vektor_W) :
                     pygame.draw.line(screen, "red", first, third, 5)
-                    print(orijentacija(vektor_v, vektor_u), orijentacija(vektor_v, vektor_W))
                     nacrtaj_krug(Krug(trenutna_pozicija[0], trenutna_pozicija[1]), "red")
                     nacrtaj_krug(Krug(sledeca_pozicija_pesaka[0], sledeca_pozicija_pesaka[1]), "red")
                     pygame.display.update()
-                    time.sleep(0.25)
+                    time.sleep(0.05)
                     nedostupni_centroidi.add(first)
                     nedostupni_centroidi.add(third)
         
@@ -228,11 +226,10 @@ def pomeranje_pesaka():
             if angle(second, third, trenutna_pozicija):
                 if orijentacija(vektor_v, vektor_u) != orijentacija(vektor_v, vektor_W) :
                     pygame.draw.line(screen, "red", third, second, 5)
-                    print(orijentacija(vektor_v, vektor_u), orijentacija(vektor_v, vektor_W))
                     nacrtaj_krug(Krug(trenutna_pozicija[0], trenutna_pozicija[1]), "red")
                     nacrtaj_krug(Krug(sledeca_pozicija_pesaka[0], sledeca_pozicija_pesaka[1]), "red")
                     pygame.display.update()
-                    time.sleep(0.25)
+                    time.sleep(0.05)
                     nedostupni_centroidi.add(third)
                     nedostupni_centroidi.add(second)
         
@@ -259,7 +256,7 @@ def angle(first, second, third): # two end points and pedestrian point
 
     degree2 = math.degrees(math.acos(a2/b2))
 
-    print(degree1, degree2)
+    # print(degree1, degree2)
     return degree1 <= 90 and degree2 <= 90
 
 
@@ -404,6 +401,7 @@ def astar(G, start, stop):
                 path.append(tmp)
                 tmp = parents[tmp]
             path.reverse()
+            print(path)
             return path
         
         for m, weight in G[n]:
@@ -422,6 +420,7 @@ def astar(G, start, stop):
         
         open_list.remove(n)
         closed_list.add(n)
+    
 
 # def napravi_listu_od_krugova(lits_krugova)
 def spoji_temena_redom(lista,color="orange"):
@@ -429,7 +428,7 @@ def spoji_temena_redom(lista,color="orange"):
          pygame.draw.line(screen, color, (lista[i][0], lista[i][1]),
                       (lista[i+1][0],lista[i+1][1]), 7) 
          pygame.display.update()
-         time.sleep(0.5)      
+         time.sleep(0.1)      
 
 
 
@@ -444,9 +443,44 @@ def orijentacija(first, second):
     return np.linalg.det([first, second]) >= 0 
 
 
+def dynamic_channel(put : list , pedestrians : list):
+    pedestrians_coords = []
+    for i in pedestrians:
+        pedestrians_coords.append((i.get_x(), i.get_y()))
+    print("dinamicki kanal\n________________________________")
+    trouglovi_indeksi = Delaunay(pedestrians_coords).simplices
+    channel_top = set()
+    channel_bot = set()
+    for i in range(len(put) - 1):
+        for trougao_indeks in trouglovi_indeksi:
+
+            first = pedestrians_coords[trougao_indeks[0]]
+            second = pedestrians_coords[trougao_indeks[1]]
+            third= pedestrians_coords[trougao_indeks[2]]
+            # centroid_tmp = ((first[0] + second[0] + third[0])/3, (first[1] + second[1] + third[1])/3)
+            vector_v = (put[i+1][0] - put[i][0], put[i+1][1] - put[i][1])
+            vector_u = (first[0] - put[i][0], first[1] - put[i][1])
+            vector_w = (second[0] - put[i][0], second[1] - put[i][1])
+            # print(centroid_tmp, put[i], put[i+1])
+            if orijentacija(vector_v, vector_u) != orijentacija(vector_v, vector_w):
+                if first in channel_bot:
+                    channel_top.add(second)
+                if second in channel_bot:
+                    channel_top.add(first)
+                else:
+                    channel_top.add(first)
+                    channel_bot.add(first)
+                
+                pygame.draw.circle(screen, "red", (first[0], first[1]), 7)
+                pygame.draw.circle(screen, "red", (second[0], second[1]), 7)
+                pygame.draw.circle(screen, "red", (third[0], third[1]), 7)
+    print("\ndinamicki kanal\n________________________________")
+
+
 def __main__():
 
     global velocity
+    kanal_index = 0
     velocity = random.random() + 10 # constant speed for every pedestrian
     podaci = dict()
     podaci = ucitaj_pesake()
@@ -532,10 +566,13 @@ def __main__():
                     lista_indeksa=[int(s) for s in l]
                     print("Lista temena kroz putanje",lista_indeksa)
                     put=[list(centroidi[k]) for k in  lista_indeksa]
+                    print("put", put)
+                    kanal_index = 1
                     # print(put)
                     spoji_temena_redom(put,"orange")
 
-
+                if event.key == pygame.K_k and kanal_index == 1:
+                    dynamic_channel(put, pedestrians)
                 # if event.key == pygame.K_k :
                 #     for i in range(len(pedestrians)):
                 #         poz_x = pedestrians[i].get_x()
