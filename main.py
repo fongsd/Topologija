@@ -103,9 +103,6 @@ def nacrtaj_putanje(pedestrians : list, color):
 
     return brzine_pesaka
 
-
-    return brzine_pesaka
-
 def nacrtaj_dugme():
     pygame.draw.rect(screen, (250, 0, 0), (10, 10, 60, 40), 0, 2)
     font = pygame.font.Font(size=38)
@@ -164,8 +161,7 @@ def nadji_centroid(pedestrians, prvo_teme, drugo_teme, trece_teme):
     y_coord = (pedestrians[prvo_teme].get_y() + pedestrians[drugo_teme].get_y() + pedestrians[trece_teme].get_y())/3
     return (x_coord, y_coord)
 
-def indeks_najblizeg_centroida(c):
-    global centroidi
+def indeks_najblizeg_centroida(c,centroidi):
     distance=float('inf')
     indeks=0
     for i,centroid in enumerate(centroidi):
@@ -197,31 +193,32 @@ def kretanje():
     for i in range(10):
         screen.fill("black")
         #!!!!
+        G.clear()
         G=definisi_graf(centroidi)
         print(G)
 
-        start_indeks=str(indeks_suseda(list(start),centroidi))
-        end_indeks=str(indeks_suseda(list(end),centroidi))
+        start_indeks=indeks_suseda(list(start),centroidi)
+        end_indeks=indeks_suseda(list(end),centroidi)
         
         print("START I END:",start_indeks,end_indeks)
         
         if i==0:
-            path,tmp = astar(start_indeks,end_indeks)
+            tmp = astar(G,centroidi[start_indeks],centroidi[end_indeks])
             if len(tmp)==2:
-                c_tmp=copy.deepcopy(centroidi[int(tmp[1])])
+                c_tmp=copy.deepcopy(list(tmp[1]))
             else:
-                c_tmp=copy.deepcopy(centroidi[int(tmp[0])])
+                c_tmp=copy.deepcopy(list(tmp[0]))
 
 
-        elif len(tmp)==2:
-            indeks=indeks_najblizeg_centroida(c_tmp)
-            path,tmp = astar(str(indeks),end_indeks)
+        else:
+            indeks=indeks_najblizeg_centroida(c_tmp,centroidi)
+            tmp = astar(G,centroidi[indeks],centroidi[end_indeks])
             if len(tmp)==2:
-                c_tmp=copy.deepcopy(centroidi[int(tmp[1])])
+                c_tmp=copy.deepcopy(list(tmp[1]))
             else:
-                c_tmp=copy.deepcopy(centroidi[int(tmp[0])])
+                c_tmp=copy.deepcopy(list(tmp[0]))
 
-        if len(path)==1:
+        if len(tmp)==1:
             # # indeks=indeks_najblizeg_centroida(c_tmp)
             # if tmp not in l:
             #     # lista_koordinata.append(list(int_tmp))
@@ -230,17 +227,23 @@ def kretanje():
             #     l.append(tmp)
             break
 
-        elif len(path)==0 and len(tmp)==0:
+        elif len(tmp)==0:
             l=[]
             break
 
-        elif len(path)>1:
+        elif len(tmp)>1:
             if tmp not in l:
                 lista_koordinata.append(list(c_tmp))
                 l.append(tmp)
             
 
         pomeranje_pesaka()
+
+        for i in range(len(lista_koordinata)-1):
+            pygame.draw.line(screen,"white", (lista_koordinata[i][0], lista_koordinata[i][1]),
+                          (lista_koordinata[i+1][0],lista_koordinata[i+1][1]), 10)
+            pygame.draw.circle(screen, "red", lista_koordinata[i], 7) 
+            time.sleep(2) 
 
         # triangulacija_temena()
         # pomeranje_centroida()
@@ -325,8 +328,8 @@ def provera_grane(fst,scnd):
         #lista temena trougla
         lista=[list(first),list(second), list(third)]
         
-        fst1=list(centroidi[int(fst)])
-        scnd1=list(centroidi[int(scnd)])
+        fst1=list(fst)
+        scnd1=list(scnd)
 
         #ako 2 tacke koje obrazuju deo putanje su zapravo temena trougla
         if (fst1 in lista) and (scnd1 in lista):                
@@ -458,8 +461,8 @@ def triangulacija_temena():
 
     for centroid in centroidi:
         font = pygame.font.Font(size=30)
-        number_of_pedestrian = font.render(str(indeks_suseda(centroid,centroidi)), True, (255, 215, 0))
-        screen.blit(number_of_pedestrian, (centroid[0]-20,centroid[1]-20,centroid[0]+20,centroid[1]+20))
+        koordinate_centroida = font.render(str(np.round(centroid)), True, (255, 215, 0))
+        screen.blit(koordinate_centroida, (centroid[0]-20,centroid[1]-20,centroid[0]+20,centroid[1]+20))
 
     return povezi_centroide()
 
@@ -584,10 +587,19 @@ def indeks_suseda(tacka,lista):
 
 
 def definisi_graf(centroidi):
+    # G={}
+    # for i,centroid in enumerate(centroidi):
+    #     susedi=dodaj_susede(list(centroid),centroidi)
+    #     G["{}".format(i)]=[[str(indeks_suseda(j,centroidi)),euclid_distance(list(j),list(centroid))] for j in susedi]
+
+    # return G
     G={}
+#     print(centroidi)
     for i,centroid in enumerate(centroidi):
+#         print(list(centroid))
         susedi=dodaj_susede(list(centroid),centroidi)
-        G["{}".format(i)]=[[str(indeks_suseda(j,centroidi)),euclid_distance(list(j),list(centroid))] for j in susedi]
+#         print(susedi)
+        G[centroid]=[[tuple(j),euclid_distance(list(j),list(centroid))] for j in susedi]
 
     return G
 
@@ -602,8 +614,9 @@ def h3(n):#heuristika udaljenosti od pocetka
     # print(H)
     return H[n]
 
-def astar( start, stop):
-    global G
+def astar( G,start, stop):
+    # global G
+    global centroidi
     open_list = set([start])
     closed_list = set([])
 
@@ -628,7 +641,7 @@ def astar( start, stop):
         if n == None:
             print("Ne postoji put!")
             s=parensts_astar.pop(m) #nisam siguran
-            return [],[]
+            return []
         
         if n == stop:
             print("Postoji put!")
@@ -641,12 +654,12 @@ def astar( start, stop):
             path.reverse()
             print("####path",path)
             if len(path)==1:
-                return path,[path[0]]
+                return [path[0]]
             
-            return path,[start,path[1]]
+            return [start,path[1]]
         
 
-        # G=definisi_graf(centroidi)
+        # G=definisi_graf(centroidi)proe
         for m, weight in G[n]:
             print("a*:", n," : ",m)
 
@@ -655,10 +668,10 @@ def astar( start, stop):
             # pygame.display.update()
             # time.sleep(1)
 
-            ntmp=list(centroidi[int(n)])
-            mtmp=list(centroidi[int(m)])
-            edge1=(ntmp,mtmp)
-            edge2=(mtmp,ntmp)
+            ntmp=n
+            mtmp=m
+            edge1=(list(ntmp),list(mtmp))
+            edge2=(list(mtmp),list(ntmp))
             #videti sad
             # print("Grana kroz koju prolazimo",edge1)
             # print("Zabrana:",nedozvoljene_putanje)
@@ -1059,34 +1072,6 @@ def __main__():
                 #     spoji_temena_redom(put,"orange")
 
 
-                # if event.key == pygame.K_k :
-                #     for i in range(len(pedestrians)):
-                #         poz_x = pedestrians[i].get_x()
-                #         poz_y = pedestrians[i].get_y()
-                #         dx = trenutne_putanje[i][0]
-                #         dy = trenutne_putanje[i][1]
-                #         krug = Krug(poz_x, poz_y)
-                #         nacrtaj_obim(krug, dx, dy)
-
-                # if event.key == pygame.K_l:
-                #     for i in range(len(pedestrians) - 1):
-                #         br_linija+=1
-                #         nacrtaj_liniju(pedestrians[i], pedestrians[i + 1]) # ovde se pravi triangulacija tacaka
-              
-                # if event.key == pygame.K_1:
-                #     for i in range(len(pedestrians) - 1):
-                #         # sused = int(random.random() * len(pedestrians) - 1)
-                #         izmeni_boju(pedestrians[i], pedestrians[i + 1], "yellow")
-                #         print("menja se boja linije")
-                #         pygame.display.update()
-                #         time.sleep(0.02)
-                # if event.key == pygame.K_2:
-                #     for i in range(20):
-                #         # sused = int(random.random() * len(pedestrians) - 1)
-                #         izmeni_boju(pedestrians[i], pedestrians[i + 1], "green")
-                #         print("menja se boja linije")
-                #         pygame.display.update() # need to update screen every time before pause and next drawing 
-                #         time.sleep(0.2)
             pygame.display.update()
 
 
