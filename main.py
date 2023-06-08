@@ -204,17 +204,17 @@ def kretanje():
             
 
         pomeranje_pesaka()
-        G=definisi_graf(centroidi)
+        # G=definisi_graf(centroidi)
         pygame.display.update()
         time.sleep(1)    
 
         if len(path)==1:
             # indeks=indeks_najblizeg_centroida(c_tmp)
-            if tmp not in l:
-                # lista_koordinata.append(list(int_tmp))
-                lista_koordinata.append(list(c_tmp))
+            # if tmp not in l:
+            #     # lista_koordinata.append(list(int_tmp))
+            #     lista_koordinata.append(list(c_tmp))
 
-                l.append(tmp)
+            #     l.append(tmp)
                 break
 
         if len(path)==0 and len(tmp)==0:
@@ -241,17 +241,18 @@ def kretanje():
         pygame.draw.circle(screen, "red", lista_koordinata[i], 7) 
         time.sleep(2) 
 
-    lista_indeksa=[int(s[0]) for s in l]
-    print("Lista temena kroz putanje",lista_indeksa)
-    put=[list(centroidi[k]) for k in  lista_indeksa]
-    # print(put)
-    print("Lista koordinata",lista_koordinata)
-    spoji_temena_redom(put,"orange")
+    # lista_indeksa=[int(s[0]) for s in l]
+    # print("Lista temena kroz putanje",lista_indeksa)
+    # put=[list(centroidi[k]) for k in  lista_indeksa]
+    # # print(put)
+    # print("Lista koordinata",lista_koordinata)
+    # spoji_temena_redom(put,"orange")
 
     return lista_koordinata
 
 
 def pomeranje_pesaka():
+    print("############################# ITERACIJA ######################")
     
     global centroidi
     global pedestrians
@@ -616,8 +617,8 @@ def astar( start, stop):
             edge1=(ntmp,mtmp)
             edge2=(mtmp,ntmp)
             #videti sad
-            print("Grana kroz koju prolazimo",edge1)
-            print("Zabrana:",nedozvoljene_putanje)
+            # print("Grana kroz koju prolazimo",edge1)
+            # print("Zabrana:",nedozvoljene_putanje)
             if edge1 in nedozvoljene_putanje or edge2 in nedozvoljene_putanje:
                 continue
 
