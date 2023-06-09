@@ -19,6 +19,7 @@ screen.fill("black")
 nedozvoljeni_putevi=[]
 parensts_astar={}
 G={}
+mapa_temena={} #vraca listu temena trougla za odredjeni centroid 
 
 putanje = []
 pocetne_putanje = []
@@ -415,11 +416,16 @@ def triangulacija_temena():
     centroidi = []
     centroidi.append(start)
     centroidi.append(end)
+    mapa_temena.clear()
+
     for trougao in tri.simplices:
         spoji_temena(pedestrians, trougao[0], trougao[1], trougao[2])
         centroid = nadji_centroid(pedestrians, trougao[0], trougao[1], trougao[2])
         centroidi.append(centroid)
-
+        mapa_temena[centroid]=[pedestrians_xy[trougao[0]],
+                               pedestrians_xy[trougao[1]],
+                               pedestrians_xy[trougao[2]]]
+    # centroidi=sorted(centroidi)
     #dodata linija
 
     # centroidi=sorted(centroidi)
@@ -903,26 +909,6 @@ def dinamicki_kanal(pesaci , putanja):
 
     return above_result,below_result
 
-def pronalazenjet1t2( lista , vektori, i, j, dthresh=30):
-    cx=lista[i][0]-lista[j][0]
-    cy=lista[i][1]-lista[j][1]
-
-    vx=vektori[i][0]-vektori[j][0]
-    vy=vektori[i][1]-vektori[j][1]
-
-    pod_korenom=8*cx*vx*cy*vy - 4*cx*cx*vy*vy - 4*cy*cy*vx*vx + 4*dthresh*dthresh*vx*vx + 4*dthresh*dthresh*vy*vy
-    
-    if pod_korenom<0:
-        return None
-
-    t1= (- 2 * cx * vx - 2 * cx * vx - math.sqrt(pod_korenom))/( 2 * cx*cx + 2 * cy*cy - 2 * dthresh*dthresh)
-    t2= (- 2 * cx * vx - 2 * cx * vx + math.sqrt(pod_korenom))/( 2 * cx*cx + 2 * cy*cy - 2 * dthresh*dthresh)
-        
-    if t1==t2:
-        return (t1,None)
-
-    else:
-        return (t1,t2)
 
 def astar_pomeranje_pesaka(astar_pesaci, astar_putanje):
     # for i in range(len(astar_pesaci)):
@@ -1044,6 +1030,152 @@ def astar_crtanje(astar_pesaci, astar_pocetne_putanje, astar_centroidi_temena):
     return lista_koordinata
 
 
+def pronalazenjet1t2( lista , vektori, i, j, dthresh=30):
+    cx=lista[i][0]-lista[j][0]
+    cy=lista[i][1]-lista[j][1]
+
+    vx=vektori[i][0]-vektori[j][0]
+    vy=vektori[i][1]-vektori[j][1]
+
+    pod_korenom=8*cx*vx*cy*vy - 4*cx*cx*vy*vy - 4*cy*cy*vx*vx + 4*dthresh*dthresh*vx*vx + 4*dthresh*dthresh*vy*vy
+    
+    if pod_korenom<0:
+        return None
+
+    t1= (- 2 * cx * vx - 2 * cx * vx - math.sqrt(pod_korenom))/( 2 * cx*cx + 2 * cy*cy - 2 * dthresh*dthresh)
+    t2= (- 2 * cx * vx - 2 * cx * vx + math.sqrt(pod_korenom))/( 2 * cx*cx + 2 * cy*cy - 2 * dthresh*dthresh)
+        
+    if t1==t2:
+        return (t1,None)
+
+    else:
+        return (t1,t2)
+
+
+def napravi_listu_pesaka(pedestrians):
+    pedestrians_xy = []
+    pedestrians_x_coord = []
+    pedestrians_y_coord = []
+    
+    for i in pedestrians:
+        pedestrians_x_coord.append(i.get_x())
+        pedestrians_y_coord.append(i.get_y())
+    
+    for i in range(len(pedestrians_x_coord)):
+        pedestrians_xy.append((pedestrians_x_coord[i], pedestrians_y_coord[i]))         
+    
+    return pedestrians_xy
+
+
+def izracunaj_vektor_za_centroid(centroid,vektori_pesaka):
+    [t1,t2,t3]=mapa_temena[centroid]
+
+    pedestrians_list=napravi_listu_pesaka(pedestrians)
+
+    indeks1=indeks_suseda(t1,pedestrians_list)
+    indeks2=indeks_suseda(t2,pedestrians_list)
+    indeks3=indeks_suseda(t3,pedestrians_list)
+
+    vektor_centroida_x=((vektori_pesaka[indeks1])[0]+ (vektori_pesaka[indeks2])[0]+(vektori_pesaka[indeks3])[0])/3.0 
+    vektor_centroida_y=((vektori_pesaka[indeks1])[1]+ (vektori_pesaka[indeks2])[1]+(vektori_pesaka[indeks3])[1])/3.0
+    
+    return [vektor_centroida_x,vektor_centroida_y]
+
+
+
+def izracunaj_vreme_preseka_sa_kretanjem(c1, c2, pesak1, pesak2, brzina_robota, c1_brzina, c2_brzina, pesak1_brzina, pesak2_brzina, threshold):
+    dt = 0.1 # vreme za jednu iteraciju 
+    #brzina / rastojanjem
+
+    max_iter = 1000 # razdaljina izmedju dva centroida
+   # v=brzina robota [dx , dy]
+   # s = d 
+#     t= v / s
+#     dt= t / d
+    robot_pozicija = c1.copy()
+    c1_trenutno = c1.copy() #centrodi1
+    c2_trenutno =c2.copy()
+    pesak1_trenutno = pesak1.copy() #crvena linija
+    pesak2_trenutno = pesak2.copy()
+
+    robot_positions = [robot_pozicija.copy()]
+    c1_positions = [c1_trenutno.copy()]
+    c2_positions = [c2_trenutno.copy()]
+    pesak1_positions = [pesak1_trenutno.copy()]
+    pesak2_positions = [pesak2_trenutno.copy()]
+
+    for i in range(max_iter):
+        p1 = robot_pozicija 
+        p2 = pesak2_trenutno
+        p3 = pesak1_trenutno
+        #rastojanje od crvene linije 
+        distance = np.linalg.norm(np.cross(p2 - p1, p1 - p3)) / np.linalg.norm(p2 - p1)
+        if distance <= threshold: #postoji presek
+            vreme_preseka = i * dt  
+            return vreme_preseka, robot_positions, c1_positions, c2_positions, pesak1_positions, pesak2_positions
+
+        robot_pozicija += brzina_robota * dt
+        c1_trenutno += c1_brzina * dt  #dodajemo pomeraj
+        c2_trenutno += c2_brzina * dt 
+        pesak1_trenutno += pesak1_brzina * dt
+        pesak2_trenutno += pesak2_brzina * dt
+
+        robot_positions.append(robot_pozicija.copy()) 
+        c1_positions.append(c1_trenutno.copy())
+        c2_positions.append(c2_trenutno.copy())
+        pesak1_positions.append(pesak1_trenutno.copy())
+        pesak2_positions.append(pesak2_trenutno.copy())
+
+    return None, robot_positions, c1_positions, c2_positions, pesak1_positions, pesak2_positions
+
+
+def resi_kvadratnu(a, b, c): 
+    # Izračunajmo diskriminantu za zadate parametre
+    D = b**2 - 4*a*c
+
+    # diskriminanta je manja od => nema realnih rešenja
+    if D < 0:  
+        return []
+    # jedno rešenje kvadratne jednacine
+    elif D == 0:  
+        return [-b / (2*a)]
+     # dva rešenja kvadratne jednacine => [x1 , x2]
+    else:  
+        return [(-b - math.sqrt(D)) / (2*a), (-b + math.sqrt(D)) / (2*a)]
+
+def daljina_veca_od_praga(p1, p2, v1, v2, Dthresh):
+    a = (v1[0] - v2[0])**2 + (v1[1] - v2[1])**2
+    b = 2 * ((p1[0] - p2[0]) * (v1[0] - v2[0]) + (p1[1] - p2[1]) * (v1[1] - v2[1]))
+    c = (p1[0] - p2[0])**2 + (p1[1] - p2[1])**2 - Dthresh**2
+
+    # Vraćamo vreme za koje je rastojanje veće od praga
+    return resi_kvadratnu(a, b, c)
+
+# print(daljina_veca_od_praga(p1, p2, v1, v2, prag))
+
+def provera_grane2(t1,t2,t):
+
+    if t1 < 0:
+        t1=0
+
+    if t==None:
+        return True
+    
+    elif t1 < t and t < t2: 
+        return True   
+     
+    return False
+
+
+
+
+
+
+
+
+
+
+
 def __main__():
 
     global velocity
@@ -1141,6 +1273,13 @@ def __main__():
                     end_indeks=str(s)
 
                     lista_koordinata=kretanje() #"live" kretanje 
+
+                    print("##############################")
+                    print(mapa_temena)
+                    print("##############################")
+
+
+
 
                 if event.key == pygame.K_q:
                     l=[]
