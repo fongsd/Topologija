@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 import json
 
-br_pesaka = 15
+br_pesaka = 20
 
 pozicije = {}
 
