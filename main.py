@@ -1212,6 +1212,14 @@ def __main__():
                 if pygame.mouse.get_pressed()[0] == True:
                     x, y = pygame.mouse.get_pos()
                     x = int(x)
+                    start = (150, 700)
+                    end = (1000, 150)
+                    centroidi.append(start)
+                    centroidi.append(end)
+                    astar_centroidi.append(start)
+                    astar_centroidi.append(end)
+
+                 
                     if x >= 10 and x <= 60 and y >= 10 and y<=40:
                         podaci = ucitaj_pesake()
                         for k,v in podaci.items():
@@ -1221,6 +1229,10 @@ def __main__():
                             pocetne_putanje.append((v[1][0], v[1][1]))
                     
                         nacrtaj_putanje(pedestrians, "red")
+                        pygame.draw.circle(screen, "blue", start, 10)
+                        pygame.draw.circle(screen, "blue", end, 10)
+                        pygame.display.update()
+                        # time.sleep(5)     
                         astar_pocetne_putanje = copy.deepcopy(pocetne_putanje)
                         astar_pesaci = copy.deepcopy(pedestrians)
                         astar_triangulacija_temena()
@@ -1231,20 +1243,7 @@ def __main__():
                         print(len(astar_pesaci), len(astar_centroidi), len(astar_pocetne_putanje))
                         first_edge = astar_crtanje()
                     # elif br_unosa<2:
-                    else:
-                        start=(150,700)
-                        end=(1000,150)
-                        # if br_unosa < 1:
-                        #     start = (x, y)
-                        #     br_unosa +=1
-                        # elif br_unosa == 1:
-                        #     end = (x, y) 
-                        #     br_unosa+=1
-                        #     # print(heuristika(start, end))
-                        centroidi.append(start)
-                        astar_centroidi.append(end)
-                        # pygame.draw.circle(screen, "purple", (x, y), 10)
-                    pygame.display.update()     
+                   
             if event.type == pygame.KEYDOWN:
 
                 if event.key == pygame.K_t:
