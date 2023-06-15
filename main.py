@@ -7,8 +7,13 @@ from krug import Krug
 from scipy.spatial import Delaunay
 import numpy as np
 import copy
-pygame.init()
 from matplotlib import pyplot as plt
+from PIL import Image
+import glob
+import os
+
+
+pygame.init()
 
 mapa_temena={}
 
@@ -206,6 +211,7 @@ def kretanje():
             pygame.draw.circle(screen, "red", lista_koordinata[i], 7) 
             # time.sleep(0.2) 
 
+        pygame.image.save(screen, f"kretanje{i}.png")
         # triangulacija_temena()
         # pomeranje_centroida()
 
@@ -224,6 +230,8 @@ def kretanje():
                       (lista_koordinata[i+1][0],lista_koordinata[i+1][1]), 6)
         pygame.draw.circle(screen, "red", lista_koordinata[i], 7) 
         # time.sleep(0.2) 
+
+    pygame.image.save(screen, f"kretanje{i+1}.png")
 
     # lista_indeksa=[int(s[0]) for s in l]
     # print("Lista temena kroz putanje",lista_indeksa)
@@ -1148,6 +1156,8 @@ def astar_crtanje():
             pygame.draw.circle(screen, "red", lista_koordinata[i], 7) 
             # time.sleep(0.2) 
 
+        pygame.image.save(screen, f"astar_crtanje{i}.png")
+
         # triangulacija_temena()
         # pomeranje_centroida()
 
@@ -1170,6 +1180,9 @@ def astar_crtanje():
                       (lista_koordinata[i+1][0],lista_koordinata[i+1][1]), 10)
         pygame.draw.circle(screen, "red", lista_koordinata[i], 7) 
         # time.sleep(0.2) 
+    
+    # pygame.image.save(screen, f"astar_crtanje{i+1}.png")
+
 
     # lista_indeksa=[int(s[0]) for s in l]
     # print("Lista temena kroz putanje",lista_indeksa)
@@ -1447,6 +1460,9 @@ def __main__():
     global astar_pocetne_putanje
     running = True
     astar_indikator=0
+    
+    [os.remove(png) for png in glob.glob("*png")]
+
     while running:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -1482,6 +1498,8 @@ def __main__():
                         astar_pesaci = copy.deepcopy(pedestrians)
                         astar_triangulacija_temena()
                         astar_centroidi = copy.deepcopy(centroidi)
+                        pygame.image.save(screen, f"animation_first_frame.png")
+                        
                         print(len(astar_pesaci), len(astar_centroidi), len(astar_pocetne_putanje))
                         first_edge = astar_crtanje()
                     elif br_unosa<2:
@@ -1521,7 +1539,7 @@ def __main__():
                     for i in range(len(first_edge)-1):
                         pygame.draw.line(screen,"orange", (first_edge[i][0], first_edge[i][1]),(first_edge[i+1][0],first_edge[i+1][1]), 10)
                         pygame.draw.circle(screen, "red", first_edge[i], 7) 
-    
+                        pygame.image.save(screen, f"topologija{i}.png")
                     
 
                 if event.key == pygame.K_q:
@@ -1550,6 +1568,24 @@ def __main__():
                     plt.scatter(x, y)
                     plt.plot(myline, mymodel(myline))
                     plt.show()    
+
+
+
+                if event.key == pygame.K_g:
+                    frames = []
+                    imgs = glob.glob("*.png")
+                    imgs=sorted(imgs)
+                    for i in imgs:
+                        new_frame = Image.open(i)
+                        frames.append(new_frame)
+                    # Save into a GIF file that loops forever
+                    frames[0].save('animated.gif', format='GIF',
+                                   append_images=frames[1:],
+                                   save_all=True,
+                                   duration=1000, loop=0)
+                    # os.startfile("animated.gif")
+                    im = Image.open('animated.gif')
+                    # im.show()
 
 
                 # if event.key == pygame.K_a and astar_indikator==1:
