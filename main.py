@@ -63,10 +63,10 @@ def nacrtaj_putanje(pedestrians : list, color):
     return brzine_pesaka
 
 def nacrtaj_dugme():
-    pygame.draw.rect(screen, (250, 0, 0), (10, 10, 60, 40), 0, 2)
-    font = pygame.font.Font(size=38)
-    number_of_pedestrian = font.render("50", True, (0, 200, 100))
-    screen.blit(number_of_pedestrian, (15, 15, 59, 39))
+    pygame.draw.rect(screen, (250, 0, 0), (10, 10, 80, 40), 0, 2)
+    font = pygame.font.Font(size=27)
+    pocetak = font.render("START", True, (0, 200, 100))
+    screen.blit(pocetak, (15, 15, 80, 39))
 
 def nacrtaj_liniju(first, second):
     pygame.draw.line(screen, (0, 200, 0), (first.get_x(), first.get_y()),
@@ -460,42 +460,24 @@ def dodaj_susede(tacka,lista):
     return susedi
 
             
-def h(n):#heuristika udaljenosti od pocetka
-    H={} 
-
-    for i in range(len(centroidi)):
-        H["{}".format(i)]=random.randint(10,40)
-
-        # H["{}".format(i)]=euclid_distance(list([centroidi[0][0], centroidi[0][1]]),list([pedestrians[i][0],pedestrians[i][1]]))
-    return H[n]
-
-def h2(n):#heuristika udaljeniosti od cilja
-    H={} 
-    global end_indeks
-    end_indeks=str(indeks_suseda(list(end),centroidi))
-    ind=int(end_indeks)
-    for i in range(len(centroidi)):
-        H["{}".format(i)]=euclid_distance(list(centroidi[ind]),list(centroidi[i]))
-    return H[n]
-
-def h3(n):#heuristika udaljenosti od pocetka
-    H={} 
+def h(n):#heuristika - udaljenost od cilja
+    H={}
     global centroidi
-
     for i,centroid in enumerate(centroidi):
-        H["{}".format(i)]=euclid_distance(list(centroidi[0]),list(centroid))
+        najblizi_centroid=centroidi[indeks_najblizeg_centroida(centroid, centroidi)]
+        H[najblizi_centroid]=euclid_distance(list(centroid),list(end))
 
-        # H["{}".format(i)]=euclid_distance(list([centroidi[0][0], centroidi[0][1]]),list([pedestrians[i][0],pedestrians[i][1]]))
-    # print(H)
-    return H[n]
+    return H[centroidi[indeks_najblizeg_centroida(n,centroidi)]]
 
-def h4(n):#heuristika udaljeniosti od cilja
-    H={} 
 
-    for i in range(len(centroidi)):
-        H["{}".format(i)]=euclid_distance([centroidi[1][0], centroidi[1][1]],[(pedestrians[i]).get_x(),(pedestrians[i]).get_y()])
-    return H[n]
+def h2(n):#heuristika -udaljenost od pocetka
+    H={}
+    global centroidi
+    for i,centroid in enumerate(centroidi):
+        najblizi_centroid=centroidi[indeks_najblizeg_centroida(centroid, centroidi)]
+        H[najblizi_centroid]=euclid_distance(list(centroid),list(start))
 
+    return H[centroidi[indeks_najblizeg_centroida(n,centroidi)]]
 
 def indeks_suseda(tacka,lista):
     for i,x in enumerate(lista):
@@ -544,11 +526,11 @@ def astar( G,start, stop):
         iteration += 1
         n = None
         for v in open_list:
-            if n == None or g[v] < g[n]  : 
+            if n == None or g[v]+h(v) < g[n]+h(n) : 
                 n = v
         if n == None:
             print("Ne postoji put!")
-            s=parensts_astar.pop(m) #nisam siguran
+            s=parensts_astar.pop(m) 
             return []
         
         if n == stop:
