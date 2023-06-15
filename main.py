@@ -19,9 +19,7 @@ mapa_temena={}
 
 screen = pygame.display.set_mode((1200, 800), pygame.RESIZABLE)
 screen.fill("black")
-
-
-nedozvoljeni_putevi=[]
+# nedozvoljeni_putevi=[]
 parensts_astar={}
 G={}
 astar_G = {}
@@ -29,8 +27,8 @@ putanje = []
 pocetne_putanje = []
 centroidi = []
 pedestrians = []
-trenutne_putanje = []
-trouglovi = 0
+# trenutne_putanje = []
+# trouglovi = 0
 astar_pocetne_putanje = []
 astar_pesaci = []
 astar_centroidi = []
@@ -38,11 +36,11 @@ start = (0, 0)
 start_indeks='0'
 end = (300, 300)
 end_indeks='1'
-velocity = 0
+# velocity = 0
 
-indikator_inicijalizacije=0
-dx=[]
-dy=[]
+# indikator_inicijalizacije=0
+# dx=[]
+# dy=[]
 
 def ucitaj_pesake():
     file_path = open("podaci.json", "r")
@@ -53,18 +51,10 @@ def ucitaj_pesake():
 def nacrtaj_krug(krug : Krug, boja):
     pygame.draw.circle(screen, boja, (krug.get_x(), krug.get_y()), 4, 0)
 
-
-
-#da li seta zbog radnoma
 def nacrtaj_putanje(pedestrians : list, color):
     global pocetne_putanje
     brzine_pesaka = []
     for poz, i in enumerate(pedestrians):
-        dx = int(random.random() * 3)
-        dy = int(random.random() * 3)
-        # s = round(random.random()* 2) - 1 
-        # k = round(random.random() * 2 ) - 1
-        # print(s, k)
         pygame.draw.line(screen, color, (i.get_x(), i.get_y()), 
                          (i.get_x() + 10 * pocetne_putanje[poz][0], i.get_y() +  10 * pocetne_putanje[poz][1]), 4)
         putanje.append((i.get_x() + 10 * pocetne_putanje[poz][0], i.get_y() + 10 * pocetne_putanje[poz][1]))
@@ -81,41 +71,23 @@ def nacrtaj_dugme():
 def nacrtaj_liniju(first, second):
     pygame.draw.line(screen, (0, 200, 0), (first.get_x(), first.get_y()),
                       (second.get_x(), second.get_y()), 1)
-    
-
-def izmeni_boju(start, end, boja : str):
-    pygame.draw.line(screen, boja, (start.get_x(), start.get_y()), (end.get_x(), end.get_y()), width=3)
-
 
 def nacrtaj_obim(krug : Krug, dx, dy):
     r = math.sqrt((krug.get_x() - dx) * (krug.get_x() - dx) + (krug.get_y() - dy) * (krug.get_y() - dy))
     r+=1
-    # print((krug.get_x(), krug.get_y()))
     pygame.draw.circle(screen, "green", (krug.get_x(), krug.get_y()), r, 2)
-
 
 def spoji_temena(pedestrians, prva, druga, treca):
     pygame.draw.line(screen, "purple", (pedestrians[prva].get_x(), pedestrians[prva].get_y()), (pedestrians[druga].get_x(), pedestrians[druga].get_y()), 1)
     pygame.draw.line(screen, "purple", (pedestrians[druga].get_x(), pedestrians[druga].get_y()), (pedestrians[treca].get_x(), pedestrians[treca].get_y()), 1)
     pygame.draw.line(screen, "purple", (pedestrians[prva].get_x(), pedestrians[prva].get_y()), (pedestrians[treca].get_x(), pedestrians[treca].get_y()), 1)
-    global trouglovi
-    trouglovi += 1
 
 def spoji_centroide(prvo, drugo, trece):
     pygame.draw.line(screen, "green", (prvo[0], prvo[1]), (drugo[0], drugo[1]), 2)
     pygame.draw.line(screen, "green", (prvo[0], prvo[1]), (trece[0], trece[1]), 2)
     pygame.draw.line(screen, "green", (trece[0], trece[1]), (drugo[0], drugo[1]), 2)
-    # da li nam je potreban skup brzina izmedju dva suseda ili mogu da se ponavljaju?
+
     return [prvo, drugo, trece]
-
-#!!!moze eucledian_distance
-def brzine_centroida(prvo_teme, drugo_teme): 
-    vx_first = prvo_teme[0]
-    vy_first = prvo_teme[1]
-    vx_second = drugo_teme[0]
-    vy_second = drugo_teme[1]
-
-    return math.dist(prvo_teme, drugo_teme)
 
 def brzine_centroida(prvo_teme, drugo_teme):
     vx_first = prvo_teme[0]
@@ -141,8 +113,6 @@ def indeks_najblizeg_centroida(c,centroidi):
     
     return indeks
 
-
-
 def kretanje():
     global pedestrians
     global centroidi
@@ -150,7 +120,6 @@ def kretanje():
     global G
     global start_indeks,end_indeks
   
-    path=[]
     tmp=[]
     l=[]
     lista_koordinata=[]
@@ -200,10 +169,7 @@ def kretanje():
                 
 
         pomeranje_pesaka()
-        # print("PUTANJE NAKON POMERANJA PESAKA", putanje)
         putanje = []
-        # print("l():",l)
-        # print("LISTA KOORDINATA",lista_koordinata)
         
         for i in range(len(lista_koordinata)-1):
             pygame.draw.line(screen,"white", (lista_koordinata[i][0], lista_koordinata[i][1]),
@@ -212,8 +178,6 @@ def kretanje():
             # time.sleep(0.2) 
 
         pygame.image.save(screen, f"kretanje{i}.png")
-        # triangulacija_temena()
-        # pomeranje_centroida()
 
 
         pygame.display.update()
@@ -233,20 +197,12 @@ def kretanje():
 
     pygame.image.save(screen, f"kretanje{i+1}.png")
 
-    # lista_indeksa=[int(s[0]) for s in l]
-    # print("Lista temena kroz putanje",lista_indeksa)
-    # put=[list(centroidi[k]) for k in  lista_indeksa]
-    # # print(put)
-    # print("Lista koordinata",lista_koordinata)
-    # spoji_temena_redom(put,"orange")
-
     return lista_koordinata
 
 
 
 def pomeranje_pesaka():
-    
-    print("############################# ITERACIJA ######################")
+
     global centroidi
     global pedestrians
     global putanje
@@ -254,21 +210,13 @@ def pomeranje_pesaka():
     stari = copy.deepcopy(pedestrians)
     brzine_pesaka = nacrtaj_putanje(pedestrians, "red") # uredjen par (trenutna pozicija pesaka, brzina == sledeca pozicija)
     for i in range(len(pedestrians)):
-            # nacrtaj_krug(pedestrians[i], "black")
             nacrtaj_obim(pedestrians[i], putanje[i][0], putanje[i][1])
             nacrtaj_krug(pedestrians[i], "white")
-            # nacrtaj_obim(pedestrians[i], putanje[i][0], putanje[i][1])
     susedni_centroidi = triangulacija_temena() # lista listi susednih temena
     for i in range(len(pedestrians)):
             pedestrians[i] = Krug(putanje[i][0], putanje[i][1])
-            # pygame.draw.line(screen, "black", (pedestrians[i].get_x(), pedestrians[i].get_y())
-                                            #    , (stari[i].get_x(), stari[i].get_y()), 4)
-   
-    # print("Susedni centroidi:",sus)
-    print("Centroids length pomeranje_pesaka:",len(centroidi))
-    # brzine_pesaka = nacrtaj_putanje(pedestrians, "red") # uredjen par (trenutna pozicija pesaka, brzina == sledeca pozicija)
 
-    # susedni_centroidi = triangulacija_temena() # lista listi susednih temena
+    # print("Centroids length pomeranje_pesaka:",len(centroidi))
 
 def provera_grane(fst,scnd):
     global centroidi
@@ -299,7 +247,6 @@ def provera_grane(fst,scnd):
         if (fst1 in lista) and (scnd1 in lista):                
 
             for (trenutna_pozicija, putanja) in brzine_pesaka:
-                # #### intersection between pedestrian and first, second centroid
                 vektor_v = (second[0] - first[0], second[1] - first[1])
                 vektor_u = (trenutna_pozicija[0] - first[0], trenutna_pozicija[1] - first[1])
                 sledeca_pozicija_pesaka = (trenutna_pozicija[0] + putanja[0], trenutna_pozicija[1] + putanja[1])
@@ -307,29 +254,23 @@ def provera_grane(fst,scnd):
 
 
 
-                # pygame.draw.line(screen, "yellow", first, second, 5)
                 if angle(first, second, trenutna_pozicija):
                     if orijentacija(vektor_v, vektor_u) != orijentacija(vektor_v, vektor_W) :
                         pygame.draw.line(screen, "red", first, second, 5)
                         if (list(first),list(second)) not in nedozvoljene_putanja:
                             nedozvoljene_putanja.append((list(first),list(second)))
-                        # print(nedozvoljene_putanja)
-                        # print(orijentacija(vektor_v, vektor_u), orijentacija(vektor_v, vektor_W))
                         nacrtaj_krug(Krug(trenutna_pozicija[0], trenutna_pozicija[1]), "red")
                         nacrtaj_krug(Krug(sledeca_pozicija_pesaka[0], sledeca_pozicija_pesaka[1]), "red")
                         pygame.display.update()
                         # time.sleep(0.2)
 
-                # ##### end
 
 
-                # #### intersection between pedestrian and first, third centroid
                 vektor_v = (third[0] - first[0], third[1] - first[1])
                 vektor_u = (trenutna_pozicija[0] - first[0], trenutna_pozicija[1] - first[1])
                 sledeca_pozicija_pesaka = (trenutna_pozicija[0] + putanja[0], trenutna_pozicija[1] + putanja[1])
                 vektor_W = (sledeca_pozicija_pesaka[0] - first[0], sledeca_pozicija_pesaka[1] - first[1])
 
-                # pygame.draw.line(screen, "yellow", first, third, 5)
 
                 if angle(first, third, trenutna_pozicija):
                     if orijentacija(vektor_v, vektor_u) != orijentacija(vektor_v, vektor_W) :
@@ -338,23 +279,15 @@ def provera_grane(fst,scnd):
                         if (list(first),list(third)) not in nedozvoljene_putanja:
                             nedozvoljene_putanja.append((list(first),list(third)))
                         
-                        # print(nedozvoljene_putanja)
-                        # print(orijentacija(vektor_v, vektor_u), orijentacija(vektor_v, vektor_W))
                         nacrtaj_krug(Krug(trenutna_pozicija[0], trenutna_pozicija[1]), "red")
                         nacrtaj_krug(Krug(sledeca_pozicija_pesaka[0], sledeca_pozicija_pesaka[1]), "red")
                         pygame.display.update()
                         # time.sleep(0.2)
 
-                # ##### end
-
-
-                #### intersection between pedestrian and second, third centroid
                 vektor_v = (third[0] - second[0], third[1] - second[1])
                 vektor_u = (trenutna_pozicija[0] - second[0], trenutna_pozicija[1] - second[1])
                 sledeca_pozicija_pesaka = (trenutna_pozicija[0] + putanja[0], trenutna_pozicija[1] + putanja[1])
                 vektor_W = (sledeca_pozicija_pesaka[0] - second[0], sledeca_pozicija_pesaka[1] - second[1])
-
-                # pygame.draw.line(screen, "yellow", second, third, 5)
 
                 if angle(second, third, trenutna_pozicija):
                     if orijentacija(vektor_v, vektor_u) != orijentacija(vektor_v, vektor_W) :
@@ -362,21 +295,13 @@ def provera_grane(fst,scnd):
                         
                         if (list(second),list(third)) not in nedozvoljene_putanja:
                             nedozvoljene_putanja.append((list(second),list(third)))
-                        # print(orijentacija(vektor_v, vektor_u), orijentacija(vektor_v, vektor_W))
+
                         nacrtaj_krug(Krug(trenutna_pozicija[0], trenutna_pozicija[1]), "red")
                         nacrtaj_krug(Krug(sledeca_pozicija_pesaka[0], sledeca_pozicija_pesaka[1]), "red")
                         pygame.display.update()
                         # time.sleep(0.2)
 
-
-            # return nedozvoljene_putan-ja   
-
-    # print("nedozvoljene putanje:",nedozvoljene_putanja)
     return nedozvoljene_putanja
-
-def pomeranje_centroida():
-    pass
-
 
 def angle(first, second, third): # two end points and pedestrian point
     vektor_u = (second[0] - first[0], second[1] - first[1])
@@ -419,7 +344,6 @@ def triangulacija_temena():
     mapa_temena.clear()
     mapa_temena[start]=sorted(pedestrians_xy)
 
-
     mapa_temena[end]=sorted(pedestrians_xy, reverse=True)
 
     for trougao in tri.simplices:
@@ -429,10 +353,6 @@ def triangulacija_temena():
         mapa_temena[centroid]=[pedestrians_xy[trougao[0]],
                                pedestrians_xy[trougao[1]],
                                pedestrians_xy[trougao[2]]]
-
-    #dodata linija
-
-    # centroidi=sorted(centroidi)
 
     for centroid in centroidi:
         font = pygame.font.Font(size=30)
@@ -448,8 +368,6 @@ def astar_povezi_centroide():
         tmp_lista =  spoji_centroide(astar_centroidi[i[0]], astar_centroidi[i[1]], astar_centroidi[i[2]]) # fja vraca [prva, druga, treca]
         lista_susednih_temena_triangulacije.append(tmp_lista) # lista susednih temena centroida
 
-    # for i in lista_susednih_temena_triangulacije:
-    #     print(i)
     for i in astar_centroidi:
         pygame.draw.circle(screen, "blue", i, 7)    
     return lista_susednih_temena_triangulacije
@@ -460,10 +378,7 @@ def astar_triangulacija_temena():
     pedestrians_xy = []
     pedestrians_x_coord = []
     pedestrians_y_coord = []
-    # print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
-    # for i in astar_pesaci:
-    #     i.stampaj()
-    #print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+
     for i in astar_pesaci:
         pedestrians_x_coord.append(i.get_x())
         pedestrians_y_coord.append(i.get_y())
@@ -471,24 +386,25 @@ def astar_triangulacija_temena():
         pedestrians_xy.append((pedestrians_x_coord[i], pedestrians_y_coord[i]))
                 
     tri = Delaunay(np.array(pedestrians_xy))
-    # print(tri.simplices)
+
     astar_centroidi = []
     astar_centroidi.append(start)
     astar_centroidi.append(end)
+
+    mapa_temena.clear()
+
+    mapa_temena[start]=sorted(pedestrians_xy)
+
+    mapa_temena[end]=sorted(pedestrians_xy, reverse=True)
+
     for trougao in tri.simplices:
-        # spoji_temena(astar_pesaci, trougao[0], trougao[1], trougao[2])
+
         centroid = nadji_centroid(astar_pesaci, trougao[0], trougao[1], trougao[2])
         astar_centroidi.append(centroid)
-
-    #dodata linija
-
-    # centroidi=sorted(centroidi)
-
-    # for centroid in astar_centroidi:
-    #     font = pygame.font.Font(size=30)
-    #     koordinate_centroida = font.render(str(np.round(centroid)), True, (255, 215, 0))
-    #     screen.blit(koordinate_centroida, (centroid[0]-20,centroid[1]-20,centroid[0]+20,centroid[1]+20))
-
+        mapa_temena[centroid]=[pedestrians_xy[trougao[0]],
+                               pedestrians_xy[trougao[1]],
+                               pedestrians_xy[trougao[2]]]
+        
     return astar_povezi_centroide()
 
 def povezi_centroide():
@@ -499,8 +415,6 @@ def povezi_centroide():
         tmp_lista =  spoji_centroide(centroidi[i[0]], centroidi[i[1]], centroidi[i[2]]) # fja vraca [prva, druga, treca]
         lista_susednih_temena_triangulacije.append(tmp_lista) # lista susednih temena centroida
 
-    # for i in lista_susednih_temena_triangulacije:
-    #     print(i)
     for i in centroidi:
         pygame.draw.circle(screen, "blue", i, 7)    
     return lista_susednih_temena_triangulacije
@@ -512,7 +426,7 @@ def vreme_sudara(a_start_x, a_start_y, b_start_x, b_start_y, vxa , vya, vxb, vyb
     ta=round(result[0],2)
     tb=round(result[1],2)
     return (ta, tb) #vracamo vremena za obe tacke tj pesaka
-# ne sme t da bude negativno....
+    # ne sme t da bude negativno....
 
 def tacka_sudara(t , start_x , start_y, vx , vy): #za racunanje x koordinate tacke sudara
     return (start_x + vx * t    , start_y + vy * t)
@@ -521,8 +435,8 @@ def tacka_sudara(t , start_x , start_y, vx , vy): #za racunanje x koordinate tac
 def euclid_distance(a,b): #proveriti
     return math.dist(a,b)
 
-
-def dodaj_susede(tacka,lista): #funkcija za pronalazenje susednih cvorova u grafu kretanja
+#funkcija za pronalazenje susednih cvorova u grafu kretanja
+def dodaj_susede(tacka,lista): 
     susedi=[]
     lista2=np.array(lista)
     d= Delaunay(lista2)
@@ -564,40 +478,18 @@ def h2(n):#heuristika udaljeniosti od cilja
         H["{}".format(i)]=euclid_distance(list(centroidi[ind]),list(centroidi[i]))
     return H[n]
 
-def dodaj_susede(tacka,lista): #funkcija za pronalazenje susednih cvorova u grafu kretanja
-    susedi=[]
-    lista2=np.array(lista)
-    d= Delaunay(lista2)
-    tmp=[]
-    ind=0
-    for i,x in enumerate(lista2[d.simplices]):  
-        ind=0
-        for j,y in enumerate(x):
-            
-            if  list(y) != tacka:
-                tmp.append(list(y))
-                
-            elif list(y) == tacka:
-                ind=1
-                
-            if ind==1 and j==2:
-                [susedi.append(k) for k in tmp if k not in susedi]
-
-        tmp.clear()
-        
-    return susedi
-
-
-def h(n):#heuristika udaljenosti od pocetka
+def h3(n):#heuristika udaljenosti od pocetka
     H={} 
+    global centroidi
 
-    for i in range(len(centroidi)):
-        H["{}".format(i)]=random.randint(10,40)
+    for i,centroid in enumerate(centroidi):
+        H["{}".format(i)]=euclid_distance(list(centroidi[0]),list(centroid))
 
         # H["{}".format(i)]=euclid_distance(list([centroidi[0][0], centroidi[0][1]]),list([pedestrians[i][0],pedestrians[i][1]]))
+    # print(H)
     return H[n]
 
-def h2(n):#heuristika udaljeniosti od cilja
+def h4(n):#heuristika udaljeniosti od cilja
     H={} 
 
     for i in range(len(centroidi)):
@@ -612,51 +504,23 @@ def indeks_suseda(tacka,lista):
 
 
 def definisi_graf(centroidi):
-    # G={}
-    # for i,centroid in enumerate(centroidi):
-    #     susedi=dodaj_susede(list(centroid),centroidi)
-    #     G["{}".format(i)]=[[str(indeks_suseda(j,centroidi)),euclid_distance(list(j),list(centroid))] for j in susedi]
-
-    # return G
     G={}
-#     print(centroidi)
     for i,centroid in enumerate(centroidi):
-        # print(list(centroid))
         susedi=dodaj_susede(list(centroid),centroidi)
         susedi.sort(reverse = True)
-        # print(susedi)
+
         G[centroid]=[[tuple(j),euclid_distance(list(j),list(centroid))] for j in susedi]
 
     return G
 
 def astar_definisi_graf(centroidi):
-    # G={}
-    # for i,centroid in enumerate(centroidi):
-    #     susedi=dodaj_susede(list(centroid),centroidi)
-    #     G["{}".format(i)]=[[str(indeks_suseda(j,centroidi)),euclid_distance(list(j),list(centroid))] for j in susedi]
-
-    # return G
     global astar_G
     astar_G={}
-    # print(centroidi)
     for i,centroid in enumerate(centroidi):
-        # print(list(centroid))
         susedi=dodaj_susede(list(centroid),centroidi)
-#         print(susedi)
         astar_G[centroid]=[[tuple(j),euclid_distance(list(j),list(centroid))] for j in susedi]
-    # print("_______________________________________________________________________________________ASTAR MAPA________________________________________________________\n", astar_G)
+
     return astar_G    
-
-def h3(n):#heuristika udaljenosti od pocetka
-    H={} 
-    global centroidi
-
-    for i,centroid in enumerate(centroidi):
-        H["{}".format(i)]=euclid_distance(list(centroidi[0]),list(centroid))
-
-        # H["{}".format(i)]=euclid_distance(list([centroidi[0][0], centroidi[0][1]]),list([pedestrians[i][0],pedestrians[i][1]]))
-    # print(H)
-    return H[n]
 
 def astar( G,start, stop):
     # global G
@@ -707,22 +571,6 @@ def astar( G,start, stop):
         for m, weight in G[n]:
             # print("a*:", n," : ",m)
 
-            # screen.fill("black")
-            # nedozvoljene_putanje = provera_grane(n,m)
-            # pygame.display.update()
-            # # time.sleep(0.1)
-
-            # ntmp=n
-            # mtmp=m
-            # edge1=(list(ntmp),list(mtmp))
-            # edge2=(list(mtmp),list(ntmp))
-            # # videti sad
-            # print("Grana kroz koju prolazimo",edge1)
-            # print("Zabrana:",nedozvoljene_putanje)
-            # if edge1 in nedozvoljene_putanje or edge2 in nedozvoljene_putanje:
-            #     continue
-
-            # print("PRE POZIVANJE PROVERE GRANE 2", putanje)
             if provera_grane2(n,m) == False:
                 pygame.draw.line(screen, "red", n, m)
                     # pygame.display.update()
@@ -754,35 +602,9 @@ def spoji_temena_redom(lista,color="orange"):
          pygame.display.update()
         #  time.sleep(0.2)      
 
-
-def heuristika(first, second):
-    return math.dist(first, second)
-
-
 def orijentacija(first, second):
 
     return np.linalg.det([first, second]) >= 0 
-
-
-
-# def napravi_listu_od_krugova(lits_krugova)
-def spoji_temena_redom(lista,color="orange"):
-    for i in range(len(lista)-1):
-         pygame.draw.line(screen, color, (lista[i][0], lista[i][1]),
-                      (lista[i+1][0],lista[i+1][1]), 7) 
-         pygame.display.update()
-        #  time.sleep(0.3)      
-
-
-
-def heuristika(first, second):
-    return math.dist(first, second)
-
-
-def orijentacija(first, second):
-
-    return np.linalg.det([first, second]) >= 0 
-
 
 def orientation(p, q, r):
     val = (q[1] - p[1]) * (r[0] - q[0]) - (q[0] - p[0]) * (r[1] - q[1])
@@ -877,14 +699,8 @@ def pronadji_najblize_pesake(lista, path):
     tmp_distance=copy.deepcopy(distances1)
     distances1=sorted(distances1)
     below1=[]
-    # if len(bellow)>=4:
-    #     for i in range(4):
-    #         indeks=tmp_distance.index(distances1[i])
-    #         bellow1.append(bellow[indeks])
-    # else:
+    
     below1=below
-
-
 
     for pesak in above:
         distances2.append(rastojanje_tacke_od_prave(pesak,a,b,c))
@@ -893,12 +709,6 @@ def pronadji_najblize_pesake(lista, path):
     tmp_distance2=copy.deepcopy(distances2)
     distances2sorted=sorted(distances2,reverse=True)
 
-    # above1=[]
-    # if len(above)>=4:
-    #     for i in range(4):
-    #         indeks=tmp_distance2.index(distances2sorted[i])
-    #         above1.append(above[indeks])
-    # else:
     above1=above
 
     return above1,below1
@@ -946,13 +756,8 @@ def dinamicki_kanal(pesaci , putanja):
         [above.append(a) for a in above2]
         [below.append(b) for b in below2]
 
-        # above.append(above2)
-        # bellow.append(bellow2)
         above=sorted(above)
         below=sorted(below)
-        # print("ABOVE_:",above)
-        # print("BELLOW_:",bellow)
-
         
         if len(above)>0 and len(below)>0:
             a_tmp=[a for a in above if a[0]>putanja[i][0] and a[0]<putanja[i+1][0] and a[1]<putanja[i][1]]
@@ -965,31 +770,15 @@ def dinamicki_kanal(pesaci , putanja):
                 najblizi_pesak=nadji_najblizeg_tacki(b_tmp,putanja[i])
                 below_result.append(najblizi_pesak)
                 # bellow_result.append(b_tmp[0])
-            
-            # print("ABOVE_RESULT:",above_result)
-            # print("BELLOW_RESULT:",bellow_result)
-
 
 
     return above_result,below_result
 
 
-
 def astar_pomeranje_pesaka():
     global astar_pesaci
     global astar_pocetne_putanje
-    # for i in range(len(astar_pesaci)):
-    #         # nacrtaj_krug(pedestrians[i], "black")
-    #         nacrtaj_obim(astar_pesaci[i], astar_putanje[i][0], astar_putanje[i][1])
-    #         nacrtaj_krug(astar_pesaci[i], "white")
-    #         # nacrtaj_obim(pedestrians[i], putanje[i][0], putanje[i][1])
-    # _ = astar_triangulacija_temena() # lista listi susednih temena
-    # for i in range(len(astar_pesaci)):
-            # astar_pesaci[i] = Krug(astar_pocetne_putanje[i][0], astar_putanje[i][1])
-            # pygame.draw.line(screen, "black", (pedestrians[i].get_x(), pedestrians[i].get_y())
-                                            #    , (stari[i].get_x(), stari[i].get_y()), 4)
-   
-    # print("Susedni centroidi:",sus)
+    pass
 
 def astar_astar(start, stop):
     # global G
@@ -997,9 +786,6 @@ def astar_astar(start, stop):
     open_list = set([start])
     closed_list = set([])
     global astar_G
-    # print("_________________________________________________________________________________")
-    # print(astar_G)
-    # print("_________________________________________________________________________________")
     g = {}      #g - dict 
     g[start] = 0
     ind=0
@@ -1038,13 +824,10 @@ def astar_astar(start, stop):
             
             return [start,path[1]]
         
-
-        # G=definisi_graf(centroidi)proe
-        # print(astar_G)
         for m, weight in astar_G[n]:
             # print("a*:", n," : ",m)
 
-            # screen.fill("black")
+            screen.fill("black")
             nedozvoljene_putanje = provera_grane(n,m)
             # pygame.display.update()
             # time.sleep(1)
@@ -1053,11 +836,15 @@ def astar_astar(start, stop):
             mtmp=m
             edge1=(list(ntmp),list(mtmp))
             edge2=(list(mtmp),list(ntmp))
-            #videti sad
-            # print("Grana kroz koju prolazimo",edge1)
-            # print("Zabrana:",nedozvoljene_putanje)
+            
+
             if edge1 in nedozvoljene_putanje or edge2 in nedozvoljene_putanje:
                 continue
+            # if provera_grane2(n,m) == False:
+            #     pygame.draw.line(screen, "red", n, m)
+            #         # pygame.display.update()
+            #     # time.sleep(0.2)
+            #     continue
 
             elif m not in open_list and m not in closed_list :
                 open_list.add(m)
@@ -1079,7 +866,6 @@ def astar_crtanje():
     # print("A STAR ", astar_centroidi)
     global astar_G
     global astar_pesaci, astar_pocetne_putanje, astar_centroidi
-    # print("A STAR ", astar_centroidi)
 
     _ = astar_triangulacija_temena()
     # print("A STAR ", astar_centroidi)
@@ -1091,18 +877,14 @@ def astar_crtanje():
     tmp=[]
     l=[]
     lista_koordinata=[]
-    # astar_centroidi = []
-    # print("A STAR ", astar_centroidi)
-    # print(astar_centroidi)
-    # astar_centroidi = copy.deepcopy(centroidi)
-    # print("A STAR ", astar_centroidi)
+
     pomocni=copy.deepcopy(astar_centroidi[int(start_indeks)])
     lista_koordinata.append(list(pomocni))
     c_tmp=[]
     indeks=0
     for i in range(15):
         screen.fill("black")
-        #!!!!
+
         astar_G.clear()
         astar_G=astar_definisi_graf(astar_centroidi)
         # print(G)
@@ -1129,12 +911,6 @@ def astar_crtanje():
                 c_tmp=copy.deepcopy(list(tmp[0]))
 
         if len(tmp)==1:
-            # # indeks=indeks_najblizeg_centroida(c_tmp)
-            # if tmp not in l:
-            #     # lista_koordinata.append(list(int_tmp))
-            #     lista_koordinata.append(list(c_tmp))
-
-            #     l.append(tmp)
             break
 
         elif len(tmp)==0:
@@ -1158,10 +934,6 @@ def astar_crtanje():
 
         pygame.image.save(screen, f"astar_crtanje{i}.png")
 
-        # triangulacija_temena()
-        # pomeranje_centroida()
-
-
         putanje = []
         pygame.display.update()
         # time.sleep(0.2)    
@@ -1171,9 +943,6 @@ def astar_crtanje():
 
     screen.fill('black')
     astar_pomeranje_pesaka()
-    # pygame.display.update()
-    # for i in range(len(pedestrians)):
-    #         nacrtaj_krug(pedestrians[i], "white")
 
     for i in range(len(lista_koordinata)-1):
         pygame.draw.line(screen,"orange", (lista_koordinata[i][0], lista_koordinata[i][1]),
@@ -1181,16 +950,6 @@ def astar_crtanje():
         pygame.draw.circle(screen, "red", lista_koordinata[i], 7) 
         # time.sleep(0.2) 
     
-    # pygame.image.save(screen, f"astar_crtanje{i+1}.png")
-
-
-    # lista_indeksa=[int(s[0]) for s in l]
-    # print("Lista temena kroz putanje",lista_indeksa)
-    # put=[list(centroidi[k]) for k in  lista_indeksa]
-    # # print(put)
-    # print("Lista koordinata",lista_koordinata)
-    # spoji_temena_redom(put,"orange")
-
     return lista_koordinata
 
 def pronalazenjet1t2( lista , vektori, i, j, dthresh=30):
@@ -1232,31 +991,22 @@ def napravi_listu_pesaka(pesaci):
 
 def izracunaj_vektor_za_centroid(centroid,vektori_pesaka):
     global putanje
-    print("______________IVZC_________________")
-    # print(mapa_temena)
-    # print("CENTRODI:",centroid)
-    print("____________________________________")
-    # print(len(putanje))
+    
     lista_temena=mapa_temena[centroidi[indeks_najblizeg_centroida(centroid,centroidi)]]
     t1=lista_temena[0]
     t2=lista_temena[1]
     t3=lista_temena[2]
-    # print(len(putanje))
 
     pedestrians_list=napravi_listu_pesaka(pedestrians)
-    # print("PESACICI", pedestrians_list)
     
     indeks1=indeks_najblizeg_centroida(t1,pedestrians_list)
     indeks2=indeks_najblizeg_centroida(t2,pedestrians_list)
     indeks3=indeks_najblizeg_centroida(t3,pedestrians_list)
-    # print(len(putanje))
 
-    print("INDEKSI", indeks1, indeks2, indeks3, len(vektori_pesaka))
     vektor_centroida_x=(vektori_pesaka[indeks1][0] + vektori_pesaka[indeks2][0] + vektori_pesaka[indeks3][0])/3.0 
     vektor_centroida_y=(vektori_pesaka[indeks1][1] + vektori_pesaka[indeks2][1] + vektori_pesaka[indeks3][1])/3.0
 
     return [vektor_centroida_x,vektor_centroida_y]
-
 
 
 def izracunaj_vreme_preseka_sa_kretanjem(c1, c2, pesak1, pesak2, brzina_robota, c1_brzina, c2_brzina, pesak1_brzina, pesak2_brzina, threshold):
@@ -1302,6 +1052,7 @@ def izracunaj_vreme_preseka_sa_kretanjem(c1, c2, pesak1, pesak2, brzina_robota, 
 
 
 def resi_kvadratnu(a, b, c): 
+    
     if a == 0:
         a = 0.01
 
@@ -1330,8 +1081,7 @@ def daljina_veca_od_praga(p1, p2, v1, v2, Dthresh):
     return resi_kvadratnu(a, b, c)
 
 def provera_grane2(c1,c2):
-    # print("GLOBAL PUTANJE PROVERA GRANE 2", putanje)
-    #trebamo dodati vektore za centroide
+    
     c2_tmp=[]
     indeks_c2=indeks_najblizeg_centroida(c2,centroidi)
 
@@ -1356,19 +1106,17 @@ def provera_grane2(c1,c2):
     # pygame.draw.circle(screen,"purple",c2,10)
     # pygame.display.update()
 
-    # print(mapa_temena)
     c11 = centroidi[indeks_najblizeg_centroida(c1, centroidi)]
-    # print("C11", c11)
     temena_c1=mapa_temena[c11]
 
     c22 = centroidi[indeks_najblizeg_centroida(c2, centroidi)]
     temena_c2=mapa_temena[c22]
 
-    print("C1/C11:",c1,c11)
-    print("C2/C22:",c2,c22)
+    # print("C1/C11:",c1,c11)
+    # print("C2/C22:",c2,c22)
 
-    print("Temena c1 ",temena_c1)
-    print("Temena c2 ",temena_c2)
+    # print("Temena c1 ",temena_c1)
+    # print("Temena c2 ",temena_c2)
 
     temena=[]
     for i in temena_c1:
@@ -1381,13 +1129,8 @@ def provera_grane2(c1,c2):
     pedestrians_list=napravi_listu_pesaka(pedestrians)
 
     try: 
-        print("PROVERA GRANE 2")
-        #############DODATO#######################
-
         teme1=temena[0]
         teme2=temena[1]
-
-        #############DODATO#######################
 
         indeks_pesaka1=indeks_najblizeg_centroida(teme1,pedestrians_list)
         indeks_pesaka2=indeks_najblizeg_centroida(teme2,pedestrians_list)
@@ -1395,15 +1138,12 @@ def provera_grane2(c1,c2):
         brzina_pesaka1=pocetne_putanje[indeks_pesaka1]
         brzine_pesaka2=pocetne_putanje[indeks_pesaka2]
 
-        threshold=15
-        # print(temena[0],temena[1],brzina_pesaka1,brzine_pesaka2,threshold)
+        threshold=35
         lista_vremena=daljina_veca_od_praga(teme1,teme2,brzina_pesaka1,brzine_pesaka2,threshold)
-        print("lista vremena:",lista_vremena)
-
+        # print("lista vremena:",lista_vremena)
 
         t, robot_positions, c1_positions, c2_positions, pesak1_positions, pesak2_positions=izracunaj_vreme_preseka_sa_kretanjem(c1,c2_tmp,teme1,teme2, [vx, vy], (vc1x,vc1y),(vc2x,vc2y), brzina_pesaka1,brzine_pesaka2,threshold)
-        # print("__________________________ROBOT________________________\n", robot_positions)
-        print("VREME", t)
+        # print("VREME", t)
 
 
         if len(lista_vremena)==0:
@@ -1439,13 +1179,8 @@ def provera_grane2(c1,c2):
             return True
 
 
-
 def __main__():
 
-    global velocity
-    velocity = random.random() + 10 # constant speed for every pedestrian
-
-    global trouglovi
     global putanje
     global centroidi
     global astar_G
@@ -1454,7 +1189,6 @@ def __main__():
     global start_indeks,end_indeks
     global pedestrians
     br_unosa = 0
-    br_linija = 0
     global astar_centroidi
     global astar_pesaci
     global astar_pocetne_putanje
@@ -1467,12 +1201,13 @@ def __main__():
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
-                # print(br_linija)
                 print(len(pedestrians))
                 break
+
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_UP:
                     screen.fill((100, 100, 100))
+
             if pygame.MOUSEBUTTONDOWN == event.type:
                 if pygame.mouse.get_pressed()[0] == True:
                     x, y = pygame.mouse.get_pos()
@@ -1484,35 +1219,31 @@ def __main__():
                             pedestrians.append(krug)
                             nacrtaj_krug(krug, "white")
                             pocetne_putanje.append((v[1][0], v[1][1]))
-                        # for i in range(20):
-                        #     x_pos = abs(random.random() * screen.get_width() - 200) + 100 # da ne bi bili previse blizu ivici
-                        #     y_pos = abs(random.random() * screen.get_height() - 200) + 100
-                        #     krug = Krug(x_pos, y_pos)
-                        #     nacrtaj_krug(krug, "white")
-                        #     pedestrians.append(krug)
-                        #     dx = random.random() * 10
-                        #     dy = random.random() * 15
-                        #     pocetne_putanje.append((dx, dy))
+                    
                         nacrtaj_putanje(pedestrians, "red")
                         astar_pocetne_putanje = copy.deepcopy(pocetne_putanje)
                         astar_pesaci = copy.deepcopy(pedestrians)
                         astar_triangulacija_temena()
                         astar_centroidi = copy.deepcopy(centroidi)
+                        #pravljenje poecetne slike animacije
                         pygame.image.save(screen, f"animation_first_frame.png")
                         
                         print(len(astar_pesaci), len(astar_centroidi), len(astar_pocetne_putanje))
                         first_edge = astar_crtanje()
-                    elif br_unosa<2:
-                        if br_unosa < 1:
-                            start = (x, y)
-                            br_unosa +=1
-                        elif br_unosa == 1:
-                            end = (x, y) 
-                            br_unosa+=1
-                            # print(heuristika(start, end))
-                        centroidi.append((x, y))
-                        astar_centroidi.append((x, y))
-                        pygame.draw.circle(screen, "purple", (x, y), 10)
+                    # elif br_unosa<2:
+                    else:
+                        start=(150,700)
+                        end=(1000,150)
+                        # if br_unosa < 1:
+                        #     start = (x, y)
+                        #     br_unosa +=1
+                        # elif br_unosa == 1:
+                        #     end = (x, y) 
+                        #     br_unosa+=1
+                        #     # print(heuristika(start, end))
+                        centroidi.append(start)
+                        astar_centroidi.append(end)
+                        # pygame.draw.circle(screen, "purple", (x, y), 10)
                     pygame.display.update()     
             if event.type == pygame.KEYDOWN:
 
@@ -1520,28 +1251,24 @@ def __main__():
                     triangulacija_temena()
                     # nacrtaj_putanje(pedestrians, "red")
 
-                # if event.key == pygame.K_v:
-                #     nacrtaj_trenutne_putanje(pedestrians, "red")
-
+                #iscrtavanje centroida i njihovo povezivanje
                 if event.key == pygame.K_c:
                         for i in centroidi:
-                            # print(i)
                             pygame.draw.circle(screen, "blue", i, 5)
-                        # print(len(tri))
 
                         povezi_centroide()
-                            # spoji_temena(centroidi, Krug(centroidi[i[0]]), )
 
+                #pokretanje dinamickog a* algoritma
                 if event.key == pygame.K_p:
-                    # astar_indikator=1
                     putanje=[]
                     lista_koordinata=kretanje() #"live" kretanje 
+                    #iscrtavanje inicijalnog(staticnog a* algoritma)
                     for i in range(len(first_edge)-1):
                         pygame.draw.line(screen,"orange", (first_edge[i][0], first_edge[i][1]),(first_edge[i+1][0],first_edge[i+1][1]), 10)
                         pygame.draw.circle(screen, "red", first_edge[i], 7) 
                         pygame.image.save(screen, f"topologija{i}.png")
                     
-
+                #pokusaj dinamickog kanala
                 if event.key == pygame.K_q:
                     l=[]
                     l.append(lista_koordinata[0])
@@ -1557,6 +1284,7 @@ def __main__():
                     spoji_temena_redom(above_r,"pink")
                     spoji_temena_redom(below_r,"yellow")
                     
+                #iscrtavanje polinomijalne aproksimacije a* putanje
                 if event.key == pygame.K_d:
                     x=[i[0] for i in lista_koordinata]
                     y=[800-i[1] for i in lista_koordinata]
@@ -1569,8 +1297,7 @@ def __main__():
                     plt.plot(myline, mymodel(myline))
                     plt.show()    
 
-
-
+                #cuvanje animacije nakon zavrsetka rada algoritma
                 if event.key == pygame.K_g:
                     frames = []
                     imgs = glob.glob("*.png")
@@ -1578,34 +1305,14 @@ def __main__():
                     for i in imgs:
                         new_frame = Image.open(i)
                         frames.append(new_frame)
-                    # Save into a GIF file that loops forever
+
                     frames[0].save('animated.gif', format='GIF',
                                    append_images=frames[1:],
                                    save_all=True,
                                    duration=1000, loop=0)
-                    # os.startfile("animated.gif")
-                    im = Image.open('animated.gif')
+                    # im = Image.open('animated.gif')
                     # im.show()
 
-
-                # if event.key == pygame.K_a and astar_indikator==1:
-                #     G=definisi_graf(centroidi)
-                #     s=indeks_suseda(list(start),centroidi)
-                #     print("Pocetak",s)
-
-                #     f=indeks_suseda(list(end),centroidi)
-                #     print('Kraj',f)
-
-                #     l=astar(G,str(s),str(f))
-
-                #     lista_indeksa=[int(s) for s in l]
-                #     print("Lista temena kroz putanje",lista_indeksa)
-                #     put=[list(centroidi[k]) for k in  lista_indeksa]
-                #     # print(put)
-                #     spoji_temena_redom(put,"orange")
-
-
             pygame.display.update()
-
 
 __main__()
